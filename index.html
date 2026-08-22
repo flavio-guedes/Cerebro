@@ -487,6 +487,7 @@
       <button class="active" data-tab="radar">Raio-X</button>
       <button data-tab="ecosystem">Ecossistema</button>
       <button data-tab="skills">Skills</button>
+      <button data-tab="competencies">Competências</button>
       <button data-tab="frameworks">Frameworks</button>
       <button data-tab="maturity">Maturidade</button>
       <button data-tab="insights">Insights</button>
@@ -635,6 +636,7 @@
       if (tab === 'radar') renderRadar();
       if (tab === 'ecosystem') renderEcosystem();
       if (tab === 'skills') renderSkills();
+      if (tab === 'competencies') renderCompetencies();
       if (tab === 'frameworks') renderFrameworks();
       if (tab === 'maturity') renderMaturity();
       if (tab === 'insights') renderInsights();
@@ -780,6 +782,12 @@
 
     function renderRadar() {
       document.getElementById('panel-title').textContent = 'Raio-X';
+      const activeProjects = ecosystem.projects.filter(p => p.status === 'ACTIVE').length;
+      const totalProjects = ecosystem.projects.length;
+      const highAlerts = ecosystem.insights.filter(i => i.severity === 'high').length;
+      const avgMaturity = Math.round(ecosystem.maturity.reduce((a, b) => a + parseInt(b.maturity), 0) / ecosystem.maturity.length);
+      const nextSteps = ecosystem.insights.filter(i => i.type === 'next').map(i => i.title);
+
       const html = `
         <div class="radar-container">
           <svg class="radar-svg" viewBox="0 0 100 100">
@@ -802,13 +810,23 @@
           </svg>
         </div>
         <div style="margin-top:10px;">
-          <div class="detail-label">Status</div>
-          <div class="detail-text">Ecossistema ativo com ${ecosystem.projects.filter(p => p.status === 'ACTIVE').length} projetos em produção.</div>
+          <div class="detail-label">Ecossistema</div>
+          <div class="detail-text">${activeProjects}/${totalProjects} projetos ativos no ecossistema.</div>
         </div>
         <div style="margin-top:10px;">
-          <div class="detail-label">Insights Prioritários</div>
-          <div class="detail-text">${ecosystem.insights.filter(i => i.severity === 'high').length} item(s) de severidade alta.</div>
+          <div class="detail-label">Maturidade média</div>
+          <div class="detail-text">${avgMaturity}% de maturidade consolidada nos domínios mapeados.</div>
         </div>
+        <div style="margin-top:10px;">
+          <div class="detail-label">Alertas críticos</div>
+          <div class="detail-text">${highAlerts} insight(s) de severidade alta requer atenção.</div>
+        </div>
+        ${nextSteps.length ? `
+        <div style="margin-top:10px;">
+          <div class="detail-label">Próximos passos</div>
+          <div class="detail-text">${nextSteps.join('; ')}.</div>
+        </div>
+        ` : ''}
       `;
       document.getElementById('content').innerHTML = html;
     }
@@ -916,6 +934,42 @@
           btn.classList.add('active');
           applyFilter(btn.dataset.filter);
         });
+      });
+    }
+
+    function renderCompetencies() {
+      document.getElementById('panel-title').textContent = 'Competências';
+      const container = document.getElementById('content');
+      container.innerHTML = '<div id="competencies-list"></div>';
+      const list = document.getElementById('competencies-list');
+      ecosystem.competencies.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.innerHTML = `
+          <div class="item-header">
+            <span class="item-name">${c.name}</span>
+          </div>
+          <div class="item-body">
+            <div class="detail-label">Competência</div>
+            <div class="detail-text">${c.detail}</div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          item.classList.toggle('expanded');
+          if (item.classList.contains('expanded')) {
+            setDetail(`
+              <div class="detail-section">
+                <div class="detail-label">Competência</div>
+                <div class="detail-text">${c.name}</div>
+              </div>
+              <div class="detail-section">
+                <div class="detail-label">Descrição</div>
+                <div class="detail-text">${c.detail}</div>
+              </div>
+            `);
+          }
+        });
+        list.appendChild(item);
       });
     }
 

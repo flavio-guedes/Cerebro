@@ -50,6 +50,11 @@ check('no inline status-row cssText', !html.includes('row.style.cssText'), 'Linh
 // 8. Header panels are clickable via makeItemClickable
 check('header panels are clickable', html.includes('panel[data-target]') && html.includes('switchTab(panel.dataset.target)'), 'Painéis do header são clicáveis');
 
+// EVOLUTION 02 checks
+check('competencies tab exists', html.includes('data-tab="competencies"'), 'Aba Competências existe');
+check('competencies render function exists', html.includes('function renderCompetencies()'), 'Função de renderização de competências existe');
+check('radar shows data context', html.includes('Maturidade média') && html.includes('Ecossistema') && html.includes('Próximos passos'), 'Raio-X mostra ecossistema, maturidade média, alertas e próximos passos');
+
 const passed = results.filter(r => r.pass).length;
 const failed = results.filter(r => !r.pass);
 
