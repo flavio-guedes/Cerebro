@@ -358,6 +358,9 @@
     .insight.opportunity { border-left-color: var(--green); }
     .insight.fragility { border-left-color: var(--orange); }
     .insight.next { border-left-color: var(--purple); }
+    .insight.severity-high { border-left-width: 4px; padding: 14px; box-shadow: 0 0 18px rgba(248,113,113,0.15); }
+    .insight.severity-mid { border-left-width: 3px; padding: 12px; }
+    .insight.severity-low { border-left-width: 2px; padding: 10px; opacity: 0.85; }
     .insight-header {
       display: flex;
       justify-content: space-between;
@@ -1101,7 +1104,7 @@
         }
         filtered.forEach(ins => {
           const el = document.createElement('div');
-          el.className = `insight ${ins.type}`;
+          el.className = `insight ${ins.type} severity-${ins.severity}`;
           const typeLabel = ins.type === 'alert' ? 'ALERTA' : ins.type === 'opportunity' ? 'OPORTUNIDADE' : ins.type === 'fragility' ? 'FRAGILIDADE' : 'PRÓXIMO PASSO';
           const typeClass = ins.type === 'alert' ? 'chip danger' : ins.type === 'opportunity' ? 'chip ok' : ins.type === 'fragility' ? 'chip warn' : 'chip plan';
           const sev = severityMeta(ins.severity);
@@ -1163,10 +1166,12 @@
 
       const alertInsights = ecosystem.insights.filter(i => i.type === 'alert').length;
       const highInsights = ecosystem.insights.filter(i => i.severity === 'high').length;
+      document.getElementById('metric-alerts').textContent = String(alertInsights);
       document.getElementById('metric-alerts-sub').textContent = alertInsights > 0 ? `${alertInsights} insight(s), ${highInsights} crítico(s)` : 'Sem alertas ativos';
 
       const activeFrameworks = ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length;
       const totalFrameworks = ecosystem.frameworks.length;
+      document.getElementById('metric-frameworks').textContent = String(activeFrameworks);
       document.getElementById('metric-frameworks-sub').textContent = `${activeFrameworks}/${totalFrameworks} ativos`;
 
       document.getElementById('metric-ecosystem-sub').textContent = `${activeProjects} em produção`;
