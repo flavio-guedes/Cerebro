@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cerebro — Hermes Ecosystem Map</title>
+  <title>Cerebro — Hermes Ecosystem Radar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b0f15;
-      --surface: #111720;
-      --surface-2: #172032;
-      --border: #212d44;
-      --text: #e6eaf2;
-      --text-muted: #7a8599;
-      --accent: #4f8cff;
-      --accent-dim: rgba(79,140,255,0.18);
-      --green: #2dd4a8;
-      --green-dim: rgba(45,212,168,0.14);
-      --orange: #f5b045;
-      --orange-dim: rgba(245,176,69,0.14);
+      --bg: #020b16;
+      --surface: #0a1628;
+      --surface-2: #0f2140;
+      --border: #1a3a5c;
+      --text: #e6f3ff;
+      --text-muted: #5a7a9a;
+      --cyan: #22d3ee;
+      --cyan-dim: rgba(34,211,238,0.25);
+      --green: #34d399;
+      --green-dim: rgba(52,211,153,0.15);
+      --orange: #fbbf24;
+      --orange-dim: rgba(251,191,36,0.15);
       --red: #f87171;
-      --red-dim: rgba(248,113,113,0.14);
+      --red-dim: rgba(248,113,113,0.18);
       --purple: #a78bfa;
-      --purple-dim: rgba(167,139,250,0.14);
+      --purple-dim: rgba(167,139,250,0.15);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,15 +33,38 @@
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100vh;
       overflow: hidden;
     }
 
+    /* Scanlines */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 3px);
+      z-index: 50;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+
     .container {
+      position: relative;
+      z-index: 1;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      padding: 14px;
+      padding: 16px;
       gap: 12px;
     }
 
@@ -55,30 +78,43 @@
     .panel {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 12px;
       position: relative;
       overflow: hidden;
     }
-    .panel::after {
+    .panel::before {
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(79,140,255,0.35), transparent);
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.4;
     }
     .panel-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      color: var(--text-muted);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      color: var(--cyan);
       text-transform: uppercase;
       margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-title::before {
+      content: "";
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
     }
     .metric {
+      font-family: 'Orbitron', sans-serif;
       font-size: 28px;
       font-weight: 700;
-      color: var(--text);
+      color: var(--cyan);
+      text-shadow: 0 0 20px var(--cyan-dim);
       line-height: 1;
     }
     .metric-sub {
@@ -88,18 +124,51 @@
       margin-top: 4px;
     }
 
-    /* Main layout */
+    /* Navigation */
+    .nav {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .nav button {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      flex: 1;
+      min-width: 90px;
+    }
+    .nav button:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan-dim);
+    }
+    .nav button.active {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Main area */
     .main {
       flex: 1;
       display: grid;
-      grid-template-columns: 220px 1fr 320px;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
       min-height: 0;
     }
-    .panel-block {
+    .main-panel {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 14px;
       position: relative;
       overflow: hidden;
@@ -107,113 +176,99 @@
       flex-direction: column;
       min-height: 0;
     }
-    .panel-block::after {
+    .main-panel::before {
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(79,140,255,0.25), transparent);
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.4;
     }
-    .panel-block-title {
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
       font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      color: var(--text-muted);
+      letter-spacing: 0.25em;
+      color: var(--cyan);
       text-transform: uppercase;
       margin-bottom: 10px;
-    }
-
-    /* Sidebar nav */
-    .nav {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      overflow-y: auto;
-      flex: 1;
-      min-height: 0;
-    }
-    .nav button {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      text-align: left;
-      transition: all 0.15s ease;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    .nav button:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(79,140,255,0.08);
-    }
-    .nav button.active {
-      background: var(--accent-dim);
-      border-color: rgba(79,140,255,0.45);
-      color: var(--accent);
-    }
-    .nav-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-    .nav button.active .nav-dot {
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent-dim);
-    }
-
-    /* Center viewport */
-    .viewport {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      min-height: 0;
-      overflow: hidden;
-    }
-    .view-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .view-title::before {
+    .panel-title::before {
       content: "";
       width: 6px; height: 6px;
       border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent-dim);
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
     }
 
-    /* Right detail panel */
-    .detail-empty {
+    /* Brain */
+    .brain-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 0;
+    }
+    .brain-svg {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      filter: drop-shadow(0 0 18px var(--cyan-dim));
+      transition: all 0.4s ease;
+    }
+    .brain-svg:hover {
+      filter: drop-shadow(0 0 32px var(--cyan-dim));
+    }
+
+    /* Content */
+    .content-area {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      padding-right: 4px;
+    }
+    .content-area::-webkit-scrollbar { width: 6px; }
+    .content-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .filter-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
       color: var(--text-muted);
-      font-size: 12px;
-      text-align: center;
-      padding: 24px 8px;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
     }
 
-    /* Cards / rows */
+    /* Items */
     .item {
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s;
       margin-bottom: 8px;
     }
     .item:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px rgba(79,140,255,0.12);
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-dim);
     }
     .item-header {
       display: flex;
@@ -222,32 +277,33 @@
       gap: 8px;
     }
     .item-name {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text);
-    }
-    .item-meta {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .item-name::before {
+      content: "";
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 4px var(--cyan);
     }
     .item-expand {
-      color: var(--accent);
+      color: var(--cyan);
       font-size: 12px;
-      transition: transform 0.2s ease;
-    }
-    .item.expanded .item-expand {
-      transform: rotate(45deg);
+      transition: transform 0.2s;
     }
     .item-body {
       display: none;
       margin-top: 8px;
       padding-top: 8px;
       border-top: 1px solid var(--border);
-      font-size: 11px;
-      color: var(--text-muted);
     }
     .item.expanded .item-body { display: block; }
+    .item.expanded .item-expand { transform: rotate(45deg); }
     .chips {
       display: flex;
       flex-wrap: wrap;
@@ -256,65 +312,61 @@
     }
     .chip {
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: 4px;
       font-size: 10px;
       font-family: 'JetBrains Mono', monospace;
       border: 1px solid var(--border);
-      background: rgba(79,140,255,0.08);
+      background: rgba(34,211,238,0.08);
       color: var(--text);
     }
-    .chip.ok { background: var(--green-dim); color: var(--green); border-color: rgba(45,212,168,0.3); }
-    .chip.warn { background: var(--orange-dim); color: var(--orange); border-color: rgba(245,176,69,0.3); }
+    .chip.ok { background: var(--green-dim); color: var(--green); border-color: rgba(52,211,153,0.3); }
+    .chip.warn { background: var(--orange-dim); color: var(--orange); border-color: rgba(251,191,36,0.3); }
+    .chip.danger { background: var(--red-dim); color: var(--red); border-color: rgba(248,113,113,0.3); }
     .chip.plan { background: var(--purple-dim); color: var(--purple); border-color: rgba(167,139,250,0.3); }
 
-    /* Status rows */
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 10px;
+    /* Insights / Alerts */
+    .insight {
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 8px;
-      margin-bottom: 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-left: 3px solid var(--cyan);
+      transition: all 0.2s;
     }
-    .status-row:hover { border-color: var(--accent); }
-    .status-domain {
+    .insight.alert { border-left-color: var(--red); }
+    .insight.opportunity { border-left-color: var(--green); }
+    .insight.fragility { border-left-color: var(--orange); }
+    .insight.next { border-left-color: var(--purple); }
+    .insight-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .insight-title {
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text);
     }
-    .status-bar {
-      width: 100px;
-      height: 5px;
-      border-radius: 3px;
-      background: var(--surface);
-      overflow: hidden;
-    }
-    .status-fill {
-      height: 100%;
-      border-radius: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--green));
+    .insight-type {
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
-    /* Detail panel helpers */
-    .detail-section {
-      margin-bottom: 12px;
+    /* Radar */
+    .radar-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
     }
-    .detail-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .detail-text {
-      font-size: 12px;
-      color: var(--text);
-      line-height: 1.5;
+    .radar-svg {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      filter: drop-shadow(0 0 12px var(--cyan-dim));
     }
 
     footer {
@@ -329,8 +381,8 @@
     }
 
     @media (max-width: 980px) {
-      .main { grid-template-columns: 1fr; }
       header { grid-template-columns: repeat(2, 1fr); }
+      .main { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       header { grid-template-columns: 1fr; }
@@ -338,6 +390,7 @@
   </style>
 </head>
 <body>
+  <div class="grid-bg"></div>
   <div class="container">
     <header>
       <div class="panel">
@@ -356,53 +409,74 @@
         <div class="metric-sub">Implementados</div>
       </div>
       <div class="panel">
-        <div class="panel-title">Maturidade</div>
-        <div class="metric" id="metric-maturity">--</div>
-        <div class="metric-sub">Nível geral</div>
+        <div class="panel-title">Alertas</div>
+        <div class="metric" id="metric-alerts" style="color:var(--orange)">--</div>
+        <div class="metric-sub">Insights ativos</div>
       </div>
     </header>
 
+    <nav class="nav">
+      <button class="active" data-tab="radar">Raio-X</button>
+      <button data-tab="skills">Skills</button>
+      <button data-tab="frameworks">Frameworks</button>
+      <button data-tab="maturity">Maturidade</button>
+      <button data-tab="insights">Insights</button>
+    </nav>
+
     <div class="main">
-      <div class="panel-block">
-        <div class="panel-block-title">Navegação</div>
-        <div class="nav">
-          <button class="active" data-view="overview">
-            <span class="nav-dot"></span>Visão geral
-          </button>
-          <button data-view="skills">
-            <span class="nav-dot"></span>Skills
-          </button>
-          <button data-view="frameworks">
-            <span class="nav-dot"></span>Frameworks
-          </button>
-          <button data-view="maturity">
-            <span class="nav-dot"></span>Maturidade
-          </button>
-          <button data-view="competencies">
-            <span class="nav-dot"></span>Competências
-          </button>
-          <button data-view="projects">
-            <span class="nav-dot"></span>Projetos
-          </button>
+      <div class="main-panel">
+        <div class="panel-title">Cérebro — Ecossistema Hermes</div>
+        <div class="brain-container">
+          <svg class="brain-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" id="brain-svg">
+            <!-- Brain outline -->
+            <path d="M100,30 C70,30 50,50 50,80 C50,110 65,125 80,130 L80,150 C80,155 85,160 100,160 C115,160 120,155 120,150 L120,130 C135,125 150,110 150,80 C150,50 130,30 100,30 Z"
+                  fill="none" stroke="var(--cyan)" stroke-width="2" id="brain-outline"/>
+            <!-- Brain hemispheres -->
+            <path d="M100,40 C85,40 75,55 75,80 C75,105 85,120 100,125 C115,120 125,105 125,80 C125,55 115,40 100,40 Z"
+                  fill="rgba(34,211,238,0.08)" stroke="var(--cyan)" stroke-width="1.5" id="brain-fill"/>
+            <line x1="100" y1="40" x2="100" y2="160" stroke="var(--cyan)" stroke-width="1.5" id="brain-divider"/>
+            <!-- Neural connections -->
+            <g id="brain-connections">
+              <path d="M80,60 L120,60 M80,80 L120,80 M80,100 L120,100 M80,120 L120,120" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <circle cx="80" cy="60" r="2" fill="var(--cyan)"/>
+              <circle cx="120" cy="60" r="2" fill="var(--cyan)"/>
+              <circle cx="80" cy="80" r="2" fill="var(--cyan)"/>
+              <circle cx="120" cy="80" r="2" fill="var(--cyan)"/>
+              <circle cx="80" cy="100" r="2" fill="var(--cyan)"/>
+              <circle cx="120" cy="100" r="2" fill="var(--cyan)"/>
+              <circle cx="80" cy="120" r="2" fill="var(--cyan)"/>
+              <circle cx="120" cy="120" r="2" fill="var(--cyan)"/>
+            </g>
+            <!-- Center core -->
+            <circle cx="100" cy="100" r="8" fill="var(--cyan)" opacity="0.8" id="brain-core">
+              <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="100" cy="100" r="4" fill="var(--bg)"/>
+            <!-- Pulse rings -->
+            <circle cx="100" cy="100" r="20" fill="none" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5">
+              <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="100" cy="100" r="20" fill="none" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5">
+              <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+              <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+            </circle>
+            <!-- Dynamic hotspots -->
+            <g id="brain-hotspots"></g>
+          </svg>
         </div>
       </div>
 
-      <div class="panel-block">
-        <div class="view-title" id="view-title">Visão geral</div>
-        <div class="viewport" id="viewport"></div>
-      </div>
-
-      <div class="panel-block">
-        <div class="panel-block-title">Detalhes</div>
-        <div id="detail">
-          <div class="detail-empty">Selecione um item para ver detalhes.</div>
-        </div>
+      <div class="main-panel">
+        <div class="panel-title" id="panel-title">Raio-X</div>
+        <div class="content-area" id="content"></div>
       </div>
     </div>
 
     <footer>
-      <span>HERMES ECOSYSTEM MAP v1.0.0</span>
-      <a href="https://github.com/flavio-guedes/Cerebro" target="_blank" style="color:var(--accent);text-decoration:none;">flavio-guedes/Cerebro</a>
+      <span>HERMES ECOSYSTEM RADAR v1.0.0</span>
+      <a href="https://github.com/flavio-guedes/Cerebro" target="_blank" style="color:var(--cyan);text-decoration:none;">flavio-guedes/Cerebro</a>
     </footer>
   </div>
 
@@ -419,18 +493,18 @@
         { name: "b2b-opportunity-finder", status: "PLANNED", stack: ["Python", "APIs"], notes: "Oportunidades B2B." }
       ],
       skills: [
-        { name: "Frontend (HTML/CSS/JS)", maturity: "high", tools: ["Vite", "Webpack", "Storybook", "Chromatic"] },
-        { name: "React / Next.js", maturity: "high", tools: ["Next.js", "React", "TypeScript", "Vite"] },
-        { name: "Tailwind CSS", maturity: "high", tools: ["Tailwind", "PostCSS", "Autoprefixer"] },
-        { name: "Python / FastAPI", maturity: "high", tools: ["FastAPI", "Uvicorn", "Pydantic", "Alembic"] },
-        { name: "IA / LLMs / Embeddings", maturity: "mid", tools: ["OpenAI", "Anthropic", "HuggingFace", "LangChain"] },
-        { name: "Automação / Agents", maturity: "mid", tools: ["n8n", "Make", "Zapier", "CrewAI"] },
-        { name: "GitHub Actions / CI", maturity: "mid", tools: ["GitHub Actions", "Workflows", "Environments"] },
-        { name: "APIs / Integrações", maturity: "high", tools: ["REST", "GraphQL", "Webhooks", "OAuth2"] },
-        { name: "Dashboards / Visualização", maturity: "high", tools: ["D3.js", "Recharts", "ECharts", "Grafana"] },
-        { name: "Design Systems", maturity: "mid", tools: ["shadcn/ui", "Radix UI", "Storybook", "Tokens"] },
-        { name: "Scraping / Browser", maturity: "mid", tools: ["Playwright", "Puppeteer", "Cheerio", "Browser Use"] },
-        { name: "Deploy / GitHub Pages", maturity: "high", tools: ["GitHub Pages", "Vercel", "Netlify", "Docker"] }
+        { name: "Frontend (HTML/CSS/JS)", maturity: "high", tools: ["Vite", "Webpack", "Storybook", "Chromatic"], category: "frontend" },
+        { name: "React / Next.js", maturity: "high", tools: ["Next.js", "React", "TypeScript", "Vite"], category: "frontend" },
+        { name: "Tailwind CSS", maturity: "high", tools: ["Tailwind", "PostCSS", "Autoprefixer"], category: "frontend" },
+        { name: "Python / FastAPI", maturity: "high", tools: ["FastAPI", "Uvicorn", "Pydantic", "Alembic"], category: "backend" },
+        { name: "IA / LLMs / Embeddings", maturity: "mid", tools: ["OpenAI", "Anthropic", "HuggingFace", "LangChain"], category: "ia" },
+        { name: "Automação / Agents", maturity: "mid", tools: ["n8n", "Make", "Zapier", "CrewAI"], category: "automacao" },
+        { name: "GitHub Actions / CI", maturity: "mid", tools: ["GitHub Actions", "Workflows", "Environments"], category: "devops" },
+        { name: "APIs / Integrações", maturity: "high", tools: ["REST", "GraphQL", "Webhooks", "OAuth2"], category: "integracoes" },
+        { name: "Dashboards / Visualização", maturity: "high", tools: ["D3.js", "Recharts", "ECharts", "Grafana"], category: "dados" },
+        { name: "Design Systems", maturity: "mid", tools: ["shadcn/ui", "Radix UI", "Storybook", "Tokens"], category: "frontend" },
+        { name: "Scraping / Browser", maturity: "mid", tools: ["Playwright", "Puppeteer", "Cheerio", "Browser Use"], category: "automacao" },
+        { name: "Deploy / GitHub Pages", maturity: "high", tools: ["GitHub Pages", "Vercel", "Netlify", "Docker"], category: "devops" }
       ],
       frameworks: [
         { name: "Next.js", status: "ACTIVE", details: "App Router, SSR/SSG, Edge Functions, API Routes" },
@@ -452,89 +526,248 @@
         { domain: "Dados", count: 3, maturity: "90%" }
       ],
       competencies: [
-        { name: "Arquitetura de interfaces de alto impacto", detail: "Dashboards, SaaS, CRMs, command centers, landing pages." },
-        { name: "Sistemas de IA e automação", detail: "LLMs, agentes, pipelines de dados, automação de processos." },
-        { name: "Dashboards e visualização de dados", detail: "KPIs, relatórios, data storytelling, real-time." },
-        { name: "Integrações e APIs", detail: "APIs REST/GraphQL, webhooks, OAuth2, conectores externos." },
-        { name: "Design Systems e componentização", detail: "Bibliotecas reutilizáveis, tokens, documentação viva." },
-        { name: "Deploy e infraestrutura web", detail: "CI/CD, GitHub Pages, Vercel, Docker, monitoramento." }
+        { name: "Arquitetura de interfaces de alto impacto", detail: "Dashboards, SaaS, CRMs, command centers, landing pages.", category: "frontend" },
+        { name: "Sistemas de IA e automação", detail: "LLMs, agentes, pipelines de dados, automação de processos.", category: "ia" },
+        { name: "Dashboards e visualização de dados", detail: "KPIs, relatórios, data storytelling, real-time.", category: "dados" },
+        { name: "Integrações e APIs", detail: "APIs REST/GraphQL, webhooks, OAuth2, conectores externos.", category: "integracoes" },
+        { name: "Design Systems e componentização", detail: "Bibliotecas reutilizáveis, tokens, documentação viva.", category: "frontend" },
+        { name: "Deploy e infraestrutura web", detail: "CI/CD, GitHub Pages, Vercel, Docker, monitoramento.", category: "devops" }
+      ],
+      insights: [
+        { type: "alert", title: "Dependência de APIs externas", desc: "epq e sistema-prospeccao dependem de APIs externas sem fallback claro.", severity: "high", projects: ["epq", "sistema-prospeccao"] },
+        { type: "opportunity", title: "Unificar Design System", desc: "Criar tokens e componentes compartilhados entre epq, ai-hub e Cerebro.", severity: "mid", projects: ["epq", "ai-hub", "Cerebro"] },
+        { type: "fragility", title: "Automação centralizada", desc: "Automação concentrada em poucos projetos; risco se um falhar.", severity: "mid", projects: ["sistema-prospeccao", "agentes"] },
+        { type: "next", title: "Expandir AI Agents", desc: "Agentes autônomos em agentes e b2b-opportunity-finder como próximo passo.", severity: "low", projects: ["agentes", "b2b-opportunity-finder"] },
+        { type: "alert", title: "Stack experimental sem cobertura", desc: "Three.js e Playwright ainda sem uso em produção nem testes.", severity: "mid", projects: ["Three.js", "Playwright"] },
+        { type: "opportunity", title: "Observabilidade unificada", desc: "Grafana + Redis + logs pode virar camada de inteligência operacional.", severity: "mid", projects: ["epq", "sistema-prospeccao"] }
       ]
     };
 
-    let selected = null;
+    let currentTab = 'radar';
+    let currentFilter = 'all';
 
-    function setDetail(content) {
-      document.getElementById('detail').innerHTML = content;
+    function setDetail(html) {
+      document.getElementById('detail').innerHTML = html;
     }
 
-    function renderOverview() {
-      document.getElementById('view-title').textContent = 'Visão geral';
+    function updateBrainState(state) {
+      const hotspots = document.getElementById('brain-hotspots');
+      const connections = document.getElementById('brain-connections');
+      const core = document.getElementById('brain-core');
+      const outline = document.getElementById('brain-outline');
+      const fill = document.getElementById('brain-fill');
+      const divider = document.getElementById('brain-divider');
+
+      hotspots.innerHTML = '';
+
+      const colorMap = {
+        frontend: 'var(--green)',
+        backend: 'var(--cyan)',
+        ia: 'var(--purple)',
+        automacao: 'var(--orange)',
+        devops: 'var(--green)',
+        integracoes: 'var(--cyan)',
+        dados: 'var(--purple)'
+      };
+
+      if (state === 'radar') {
+        const domains = [
+          { x: 80, y: 60, c: 'frontend' },
+          { x: 120, y: 60, c: 'backend' },
+          { x: 80, y: 100, c: 'ia' },
+          { x: 120, y: 100, c: 'automacao' },
+          { x: 80, y: 140, c: 'devops' },
+          { x: 120, y: 140, c: 'integracoes' }
+        ];
+        domains.forEach(d => {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute('cx', d.x);
+          c.setAttribute('cy', d.y);
+          c.setAttribute('r', '5');
+          c.setAttribute('fill', colorMap[d.c] || 'var(--cyan)');
+          c.setAttribute('opacity', '0.9');
+          c.style.cursor = 'pointer';
+          c.addEventListener('click', () => {
+            document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'skills'));
+            switchTab('skills');
+            setTimeout(() => {
+              document.querySelectorAll('.filter-btn').forEach(f => f.classList.toggle('active', f.dataset.filter === d.c));
+              applyFilter(d.c);
+            }, 50);
+          });
+          hotspots.appendChild(c);
+        });
+        connections.setAttribute('opacity', '0.5');
+        core.setAttribute('fill', 'var(--cyan)');
+      } else if (state === 'skills') {
+        const positions = [
+          { x: 60, y: 50 }, { x: 140, y: 50 }, { x: 60, y: 100 }, { x: 140, y: 100 },
+          { x: 60, y: 150 }, { x: 140, y: 150 }, { x: 100, y: 80 }, { x: 100, y: 120 }
+        ];
+        positions.forEach(p => {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute('cx', p.x);
+          c.setAttribute('cy', p.y);
+          c.setAttribute('r', '3');
+          c.setAttribute('fill', 'var(--green)');
+          c.setAttribute('opacity', '0.8');
+          hotspots.appendChild(c);
+        });
+        connections.setAttribute('opacity', '0.8');
+        core.setAttribute('fill', 'var(--green)');
+      } else if (state === 'frameworks') {
+        connections.setAttribute('opacity', '0.9');
+        core.setAttribute('fill', 'var(--orange)');
+        outline.setAttribute('stroke', 'var(--orange)');
+        fill.setAttribute('fill', 'rgba(251,191,36,0.08)');
+        divider.setAttribute('stroke', 'var(--orange)');
+      } else if (state === 'maturity') {
+        connections.setAttribute('opacity', '0.4');
+        core.setAttribute('fill', 'var(--purple)');
+        outline.setAttribute('stroke', 'var(--purple)');
+        fill.setAttribute('fill', 'rgba(167,139,250,0.08)');
+        divider.setAttribute('stroke', 'var(--purple)');
+      } else if (state === 'insights') {
+        const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        pulse.setAttribute('cx', '100');
+        pulse.setAttribute('cy', '100');
+        pulse.setAttribute('r', '12');
+        pulse.setAttribute('fill', 'none');
+        pulse.setAttribute('stroke', 'var(--red)');
+        pulse.setAttribute('stroke-width', '1');
+        pulse.setAttribute('opacity', '0.6');
+        const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        anim.setAttribute('attributeName', 'r');
+        anim.setAttribute('values', '12;25;12');
+        anim.setAttribute('dur', '2s');
+        anim.setAttribute('repeatCount', 'indefinite');
+        const animOp = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        animOp.setAttribute('attributeName', 'opacity');
+        animOp.setAttribute('values', '0.6;0;0.6');
+        animOp.setAttribute('dur', '2s');
+        animOp.setAttribute('repeatCount', 'indefinite');
+        pulse.appendChild(anim);
+        pulse.appendChild(animOp);
+        hotspots.appendChild(pulse);
+        connections.setAttribute('opacity', '0.6');
+        core.setAttribute('fill', 'var(--red)');
+        outline.setAttribute('stroke', 'var(--red)');
+        fill.setAttribute('fill', 'rgba(248,113,113,0.08)');
+        divider.setAttribute('stroke', 'var(--red)');
+      }
+
+      if (state !== 'frameworks' && state !== 'maturity' && state !== 'insights') {
+        outline.setAttribute('stroke', 'var(--cyan)');
+        fill.setAttribute('fill', 'rgba(34,211,238,0.08)');
+        divider.setAttribute('stroke', 'var(--cyan)');
+      }
+    }
+
+    function renderRadar() {
+      document.getElementById('panel-title').textContent = 'Raio-X';
       const html = `
-        <div class="detail-section">
-          <div class="detail-label">Status do ecossistema</div>
-          <div class="detail-text">Ecossistema ativo com ${ecosystem.projects.filter(p => p.status === 'ACTIVE').length} projetos em produção e ${ecosystem.projects.filter(p => p.status === 'PLANNED').length} planejados.</div>
+        <div class="radar-container">
+          <svg class="radar-svg" viewBox="0 0 100 100">
+            <defs>
+              <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.05"/>
+              </radialGradient>
+            </defs>
+            <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+            <polygon points="50,20 80,40 80,70 50,88 20,70 20,40" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>
+            <polygon points="50,30 70,45 70,65 50,80 30,65 30,45" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>
+            <line x1="50" y1="50" x2="50" y2="10" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+            <line x1="50" y1="50" x2="90" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+            <line x1="50" y1="50" x2="90" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+            <line x1="50" y1="50" x2="50" y2="95" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+            <line x1="50" y1="50" x2="10" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+            <line x1="50" y1="50" x2="10" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+            <circle cx="50" cy="50" r="3" fill="var(--cyan)"/>
+          </svg>
         </div>
-        <div class="detail-section">
-          <div class="detail-label">Distribuição</div>
-          <div class="chips">
-            <span class="chip ok">${ecosystem.projects.filter(p => p.status === 'ACTIVE').length} ativos</span>
-            <span class="chip plan">${ecosystem.projects.filter(p => p.status === 'PLANNED').length} planejados</span>
-            <span class="chip warn">${ecosystem.frameworks.filter(f => f.status === 'EXPERIMENTAL').length} experimentais</span>
-          </div>
+        <div style="margin-top:10px;">
+          <div class="detail-label">Status</div>
+          <div class="detail-text">Ecossistema ativo com ${ecosystem.projects.filter(p => p.status === 'ACTIVE').length} projetos em produção.</div>
         </div>
       `;
-      setDetail(html);
+      document.getElementById('content').innerHTML = html;
     }
 
     function renderSkills() {
-      document.getElementById('view-title').textContent = 'Skills & Competências';
-      const container = document.getElementById('viewport');
-      container.innerHTML = '';
-      ecosystem.skills.forEach(skill => {
-        const item = document.createElement('div');
-        item.className = 'item';
-        const maturityLabel = skill.maturity === 'high' ? 'ALTA' : skill.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
-        const maturityClass = skill.maturity === 'high' ? 'chip ok' : skill.maturity === 'mid' ? 'chip warn' : 'chip plan';
-        item.innerHTML = `
-          <div class="item-header">
-            <span class="item-name">${skill.name}</span>
-            <span class="chip ${maturityClass}">${maturityLabel}</span>
-            <span class="item-expand">+</span>
-          </div>
-          <div class="item-body">
-            <div class="detail-label">Ferramentas</div>
-            <div class="chips">
-              ${(skill.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}
+      document.getElementById('panel-title').textContent = 'Skills & Competências';
+      const container = document.getElementById('content');
+      const categories = ['all', ...new Set(ecosystem.skills.map(s => s.category))];
+      container.innerHTML = `
+        <div class="filters" id="skill-filters">
+          ${categories.map(c => `<button class="filter-btn ${c === 'all' ? 'active' : ''}" data-filter="${c}">${c === 'all' ? 'Todos' : c}</button>`).join('')}
+        </div>
+        <div id="skills-list"></div>
+      `;
+
+      function applyFilter(cat) {
+        currentFilter = cat;
+        const list = document.getElementById('skills-list');
+        const filtered = cat === 'all' ? ecosystem.skills : ecosystem.skills.filter(s => s.category === cat);
+        list.innerHTML = '';
+        filtered.forEach(skill => {
+          const item = document.createElement('div');
+          item.className = 'item';
+          const maturityLabel = skill.maturity === 'high' ? 'ALTA' : skill.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
+          const maturityClass = skill.maturity === 'high' ? 'chip ok' : skill.maturity === 'mid' ? 'chip warn' : 'chip plan';
+          item.innerHTML = `
+            <div class="item-header">
+              <span class="item-name">${skill.name}</span>
+              <span class="chip ${maturityClass}">${maturityLabel}</span>
+              <span class="item-expand">+</span>
             </div>
-          </div>
-        `;
-        item.addEventListener('click', () => {
-          item.classList.toggle('expanded');
-          if (item.classList.contains('expanded')) {
-            setDetail(`
-              <div class="detail-section">
-                <div class="detail-label">Skill</div>
-                <div class="detail-text">${skill.name}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Maturidade</div>
-                <div class="detail-text">${maturityLabel}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Ferramentas</div>
-                <div class="chips">${(skill.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
-              </div>
-            `);
-          }
+            <div class="item-body">
+              <div class="detail-label">Ferramentas</div>
+              <div class="chips">${(skill.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
+            </div>
+          `;
+          item.addEventListener('click', () => {
+            item.classList.toggle('expanded');
+            if (item.classList.contains('expanded')) {
+              setDetail(`
+                <div class="detail-section">
+                  <div class="detail-label">Skill</div>
+                  <div class="detail-text">${skill.name}</div>
+                </div>
+                <div class="detail-section">
+                  <div class="detail-label">Categoria</div>
+                  <div class="detail-text">${skill.category}</div>
+                </div>
+                <div class="detail-section">
+                  <div class="detail-label">Maturidade</div>
+                  <div class="detail-text">${maturityLabel}</div>
+                </div>
+                <div class="detail-section">
+                  <div class="detail-label">Ferramentas</div>
+                  <div class="chips">${(skill.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
+                </div>
+              `);
+            }
+          });
+          list.appendChild(item);
         });
-        container.appendChild(item);
+      }
+
+      applyFilter('all');
+      document.querySelectorAll('#skill-filters .filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#skill-filters .filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          applyFilter(btn.dataset.filter);
+        });
       });
     }
 
     function renderFrameworks() {
-      document.getElementById('view-title').textContent = 'Frameworks Implementados';
-      const container = document.getElementById('viewport');
-      container.innerHTML = '';
+      document.getElementById('panel-title').textContent = 'Frameworks Implementados';
+      const container = document.getElementById('content');
+      container.innerHTML = '<div id="frameworks-list"></div>';
+      const list = document.getElementById('frameworks-list');
       ecosystem.frameworks.forEach(fw => {
         const item = document.createElement('div');
         item.className = 'item';
@@ -542,7 +775,7 @@
         item.innerHTML = `
           <div class="item-header">
             <span class="item-name">${fw.name}</span>
-            <span class="${statusClass}">${fw.status}</span>
+            <span class="chip ${statusClass}">${fw.status}</span>
             <span class="item-expand">+</span>
           </div>
           <div class="item-body">
@@ -569,19 +802,21 @@
             `);
           }
         });
-        container.appendChild(item);
+        list.appendChild(item);
       });
     }
 
     function renderMaturity() {
-      document.getElementById('view-title').textContent = 'Maturidade por Domínio';
-      const container = document.getElementById('viewport');
-      container.innerHTML = '';
+      document.getElementById('panel-title').textContent = 'Maturidade por Domínio';
+      const container = document.getElementById('content');
+      container.innerHTML = '<div id="maturity-list"></div>';
+      const list = document.getElementById('maturity-list');
       ecosystem.maturity.forEach(m => {
         const row = document.createElement('div');
         row.className = 'status-row';
+        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all 0.15s ease;';
         row.innerHTML = `
-          <span class="status-domain">${m.domain}</span>
+          <span class="status-domain" style="font-size:12px;font-weight:500;color:var(--text)">${m.domain}</span>
           <div class="status-bar"><div class="status-fill" style="width:${m.maturity}"></div></div>
           <span class="chip ok">${m.maturity}</span>
         `;
@@ -601,116 +836,57 @@
             </div>
           `);
         });
-        container.appendChild(row);
+        list.appendChild(row);
       });
     }
 
-    function renderCompetencies() {
-      document.getElementById('view-title').textContent = 'Competências Principais';
-      const container = document.getElementById('viewport');
-      container.innerHTML = '';
-      ecosystem.competencies.forEach(c => {
-        const item = document.createElement('div');
-        item.className = 'item';
-        item.innerHTML = `
-          <div class="item-header">
-            <span class="item-name">${c.name}</span>
-            <span class="item-expand">+</span>
+    function renderInsights() {
+      document.getElementById('panel-title').textContent = 'Insights';
+      const container = document.getElementById('content');
+      container.innerHTML = '<div id="insights-list"></div>';
+      const list = document.getElementById('insights-list');
+      ecosystem.insights.forEach(ins => {
+        const el = document.createElement('div');
+        el.className = `insight ${ins.type}`;
+        const typeLabel = ins.type === 'alert' ? 'ALERTA' : ins.type === 'opportunity' ? 'OPORTUNIDADE' : ins.type === 'fragility' ? 'FRAGILIDADE' : 'PRÓXIMO PASSO';
+        const typeClass = ins.type === 'alert' ? 'chip danger' : ins.type === 'opportunity' ? 'chip ok' : ins.type === 'fragility' ? 'chip warn' : 'chip plan';
+        el.innerHTML = `
+          <div class="insight-header">
+            <span class="insight-title">${ins.title}</span>
+            <span class="insight-type ${typeClass}">${typeLabel}</span>
           </div>
-          <div class="item-body">
-            <div class="detail-label">Aplicação</div>
-            <div class="detail-text">${c.detail}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${ins.desc}</div>
+          <div class="chips" style="margin-top:6px;">
+            ${(ins.projects || []).map(p => `<span class="chip">${p}</span>`).join('')}
           </div>
         `;
-        item.addEventListener('click', () => {
-          item.classList.toggle('expanded');
-          if (item.classList.contains('expanded')) {
-            setDetail(`
-              <div class="detail-section">
-                <div class="detail-label">Competência</div>
-                <div class="detail-text">${c.name}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Aplicação</div>
-                <div class="detail-text">${c.detail}</div>
-              </div>
-            `);
-          }
-        });
-        container.appendChild(item);
+        list.appendChild(el);
       });
     }
 
-    function renderProjects() {
-      document.getElementById('view-title').textContent = 'Projetos';
-      const container = document.getElementById('viewport');
-      container.innerHTML = '';
-      ecosystem.projects.forEach(p => {
-        const item = document.createElement('div');
-        item.className = 'item';
-        const statusClass = p.status === 'ACTIVE' ? 'chip ok' : 'chip plan';
-        item.innerHTML = `
-          <div class="item-header">
-            <span class="item-name">${p.name}</span>
-            <span class="${statusClass}">${p.status}</span>
-            <span class="item-expand">+</span>
-          </div>
-          <div class="item-body">
-            <div class="detail-label">Stack</div>
-            <div class="chips">${(p.stack || []).map(s => `<span class="chip">${s}</span>`).join('')}</div>
-            <div class="detail-label" style="margin-top:8px;">Notas</div>
-            <div class="detail-text">${p.notes}</div>
-          </div>
-        `;
-        item.addEventListener('click', () => {
-          item.classList.toggle('expanded');
-          if (item.classList.contains('expanded')) {
-            setDetail(`
-              <div class="detail-section">
-                <div class="detail-label">Projeto</div>
-                <div class="detail-text">${p.name}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Status</div>
-                <div class="detail-text">${p.status}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Stack</div>
-                <div class="chips">${(p.stack || []).map(s => `<span class="chip">${s}</span>`).join('')}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Notas</div>
-                <div class="detail-text">${p.notes}</div>
-              </div>
-            `);
-          }
-        });
-        container.appendChild(item);
-      });
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+      updateBrainState(tab);
+      if (tab === 'radar') renderRadar();
+      if (tab === 'skills') renderSkills();
+      if (tab === 'frameworks') renderFrameworks();
+      if (tab === 'maturity') renderMaturity();
+      if (tab === 'insights') renderInsights();
     }
 
     function init() {
       document.getElementById('metric-ecosystem').textContent = String(ecosystem.projects.length);
       document.getElementById('metric-skills').textContent = String(ecosystem.skills.length);
       document.getElementById('metric-frameworks').textContent = String(ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length);
-      document.getElementById('metric-maturity').textContent = '87%';
+      document.getElementById('metric-alerts').textContent = String(ecosystem.insights.filter(i => i.type === 'alert').length);
 
       document.querySelectorAll('.nav button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const view = btn.dataset.view;
-          document.getElementById('viewport').innerHTML = '';
-          if (view === 'overview') renderOverview();
-          if (view === 'skills') renderSkills();
-          if (view === 'frameworks') renderFrameworks();
-          if (view === 'maturity') renderMaturity();
-          if (view === 'competencies') renderCompetencies();
-          if (view === 'projects') renderProjects();
-        });
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
 
-      renderOverview();
+      updateBrainState('radar');
+      renderRadar();
     }
 
     init();
