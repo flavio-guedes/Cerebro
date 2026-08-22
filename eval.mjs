@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * EVOLUTION 01-03 acceptance gate
+ * EVOLUTION 01-05 acceptance gate
  */
 
 const htmlPath = path.join(__dirname, 'index.html');
@@ -41,10 +41,24 @@ check('insights are sorted by severity', html.includes("order[a.severity] ?? 9")
 check('KPIs have contextual subtext', html.includes('metric-ecosystem-sub') && html.includes('metric-skills-sub') && html.includes('metric-frameworks-sub') && html.includes('metric-alerts-sub'), 'KPIs possuem subtítulo contextual');
 check('alerts KPI has context', html.includes('crítico(s)'), 'KPI de alertas mostra contagem crítica');
 
+// EVOLUTION 04 checks
+check('brain has state class', html.includes('state-${state}') && html.includes('brain-svg.state-radar'), 'Brain SVG tem classe de estado para affordance');
+check('non-radar brain has reduced glow', html.includes('.brain-svg:not(.state-radar):hover') && html.includes('filter: none'), 'Hover glow desativado fora do radar');
+check('filters exist for skills', html.includes('id="skill-filters"'), 'Filtros existem para skills');
+check('filters exist for frameworks', html.includes('id="framework-filters"'), 'Filtros existem para frameworks');
+check('filters exist for insights', html.includes('id="insight-filters"'), 'Filtros existem para insights');
+
+// EVOLUTION 05 checks
+check('clickable items have role=button', html.includes("setAttribute('role', 'button')") || html.includes('role="button"'), 'Elementos clicáveis tem role=button');
+check('clickable items have tabindex=0', html.includes("setAttribute('tabindex', '0')") || html.includes('tabindex="0"'), 'Elementos clicáveis tem tabindex=0');
+check('keyboard activation exists', html.includes("e.key === 'Enter'") && html.includes("e.key === ' '"), 'Ativação por teclado Enter/Space existe');
+check('text-muted contrast improved', html.includes('--text-muted: #a0c4e0'), 'Token --text-muted ajustado para contraste AA');
+check('focus visible styles exist', html.includes(':focus-visible') || html.includes(':focus'), 'Estilos de foco visível existem');
+
 const passed = results.filter(r => r.pass).length;
 const failed = results.filter(r => !r.pass);
 
-console.log(`\n=== EVOLUTION 01-03 Eval ===`);
+console.log(`\n=== EVOLUTION 01-05 Eval ===`);
 console.log(`Passed: ${passed}/${results.length}\n`);
 
 results.forEach(r => {

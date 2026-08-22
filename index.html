@@ -241,6 +241,12 @@
     .brain-svg:hover {
       filter: drop-shadow(0 0 32px var(--cyan-dim));
     }
+    .brain-svg.state-radar:hover {
+      filter: drop-shadow(0 0 32px var(--cyan-dim));
+    }
+    .brain-svg:not(.state-radar):hover {
+      filter: none;
+    }
 
     /* Content */
     .content-area {
@@ -274,6 +280,10 @@
       border-color: var(--cyan);
       color: var(--cyan);
       background: var(--cyan-dim);
+    }
+    .filter-btn:focus-visible, .nav button:focus-visible, .status-row:focus-visible, .item:focus-visible, .insight:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
     }
 
     /* Items */
@@ -676,8 +686,10 @@
       const outline = document.getElementById('brain-outline');
       const fill = document.getElementById('brain-fill');
       const divider = document.getElementById('brain-divider');
+      const brainSvg = document.getElementById('brain-svg');
 
       hotspots.innerHTML = '';
+      brainSvg.className = `brain-svg state-${state}`;
 
       const colorMap = {
         frontend: 'var(--green)',
@@ -730,10 +742,10 @@
           c.setAttribute('cy', p.y);
           c.setAttribute('r', '3');
           c.setAttribute('fill', 'var(--green)');
-          c.setAttribute('opacity', '0.8');
+          c.setAttribute('opacity', '0.4');
           hotspots.appendChild(c);
         });
-        connections.setAttribute('opacity', '0.8');
+        connections.setAttribute('opacity', '0.6');
         core.setAttribute('fill', 'var(--green)');
       } else if (state === 'frameworks') {
         connections.setAttribute('opacity', '0.9');
