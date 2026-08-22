@@ -3,392 +3,639 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cerebro — HIIF Ecosystem Dashboard</title>
+  <title>Cerebro — Neural Analytics Command</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --surface-2: #1a1a24;
-      --border: #23232f;
-      --text: #e6e6f0;
-      --text-muted: #8a8a9a;
-      --accent: #6366f1;
-      --accent-2: #8b5cf6;
-      --accent-3: #22d3ee;
-      --success: #34d399;
-      --warning: #fbbf24;
-      --danger: #f87171;
+      --bg: #020b16;
+      --surface: #0a1628;
+      --surface-2: #0f2140;
+      --border: #1a3a5c;
+      --text: #e6f3ff;
+      --text-muted: #5a7a9a;
+      --cyan: #22d3ee;
+      --cyan-dim: rgba(34,211,238,0.25);
+      --green: #34d399;
+      --green-dim: rgba(52,211,153,0.15);
+      --orange: #fbbf24;
+      --orange-dim: rgba(251,191,36,0.15);
+      --red: #f87171;
+      --red-dim: rgba(248,113,113,0.18);
+      --purple: #a78bfa;
     }
 
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { margin: 0; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanlines */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 3px);
+      z-index: 50;
+    }
+
+    /* Grid background */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
     }
 
     .container {
-      max-width: 1200px;
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 40px 24px;
+      padding: 24px;
     }
 
+    /* Header */
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .logo-mark {
-      width: 42px; height: 42px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-3));
-      display: grid; place-items: center;
-      font-weight: 800; color: #0a0a0f;
-    }
-    .title-group h1 { margin: 0; font-size: 22px; }
-    .title-group p { margin: 6px 0 0; color: var(--text-muted); font-size: 14px; }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .grid {
       display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
       gap: 16px;
+      align-items: start;
+      margin-bottom: 20px;
     }
-    .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-    .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-    .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-
-    @media (max-width: 980px) {
-      .grid-cols-3, .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 640px) {
-      .grid-cols-3, .grid-cols-4, .grid-cols-2 { grid-template-columns: 1fr; }
-      header { flex-direction: column; align-items: flex-start; }
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-    }
-    .card h3 {
-      margin: 0 0 10px;
-      font-size: 13px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .card .value {
-      font-size: 30px;
-      font-weight: 700;
-      background: linear-gradient(135deg, var(--text), var(--accent-3));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .card .sub {
-      margin-top: 6px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
     .panel {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
+      border-radius: 8px;
+      padding: 14px;
+      position: relative;
+      overflow: hidden;
     }
-    .panel + .panel { margin-top: 16px; }
-    .panel h2 {
-      margin: 0 0 16px;
-      font-size: 16px;
+    .panel::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0.4;
+    }
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+    }
+    .panel-title::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
     }
 
+    /* Code block */
+    .code-block {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 4px;
+      border-left: 2px solid var(--cyan);
+    }
+    .code-block .key { color: var(--purple); }
+    .code-block .type { color: var(--orange); }
+    .code-block .comment { color: #3a5a7a; font-style: italic; }
+
+    /* Vital signs */
+    .vital-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    .vital-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 20px var(--cyan-dim);
+      line-height: 1;
+    }
+    .vital-unit {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Main grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 40% 60%;
+      gap: 16px;
+    }
+
+    .left-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sub-grid {
+      display: grid;
+      gap: 16px;
+    }
+    .sub-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .sub-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .sub-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+    /* Brain */
+    .brain-container {
+      position: relative;
+      height: 360px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at center, rgba(34,211,238,0.08), transparent 70%);
+    }
+    .brain-wireframe {
+      width: 260px;
+      height: 260px;
+      position: relative;
+      animation: rotate 30s linear infinite;
+    }
+    @keyframes rotate {
+      from { transform: rotateX(15deg) rotateY(0deg); }
+      to { transform: rotateX(15deg) rotateY(360deg); }
+    }
+    .brain-hex {
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--cyan);
+      border-radius: 50%;
+      opacity: 0.3;
+      box-shadow: 0 0 30px var(--cyan-dim), inset 0 0 30px var(--cyan-dim);
+    }
+    .brain-hex:nth-child(2) { inset: 20px; opacity: 0.5; animation: pulse 4s ease-in-out infinite; }
+    .brain-hex:nth-child(3) { inset: 40px; opacity: 0.7; animation: pulse 4s ease-in-out infinite 1s; }
+    .brain-center {
+      position: absolute;
+      inset: 60px;
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 30px var(--cyan);
+      background: radial-gradient(circle, var(--cyan-dim), transparent);
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    .brain-score-label {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.15em;
+    }
+
+    /* Gauges */
+    .gauge {
+      position: relative;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: conic-gradient(var(--cyan) var(--pct, 46%), var(--surface-2) 0);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 20px var(--cyan-dim);
+    }
+    .gauge-inner {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: var(--surface);
+      display: grid;
+      place-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--cyan);
+    }
+    .gauge-label {
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      letter-spacing: 0.1em;
+    }
+
+    /* Status bars */
+    .status-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--surface-2);
+      overflow: hidden;
+      position: relative;
+    }
+    .status-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+    .status-bar-fill.green { background: var(--green); box-shadow: 0 0 8px var(--green-dim); }
+    .status-bar-fill.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange-dim); }
+    .status-bar-fill.red { background: var(--red); box-shadow: 0 0 8px var(--red-dim); }
+
+    /* Wave */
+    .waveform {
+      height: 60px;
+      background: linear-gradient(180deg, transparent, rgba(34,211,238,0.05));
+      border-top: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .waveform svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 200%;
+      height: 100%;
+    }
+
+    /* Radar */
+    .radar {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      max-width: 220px;
+      margin: 0 auto;
+    }
+    .radar svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px var(--cyan-dim));
+    }
+
+    /* Table */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
     }
-    th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 10px 8px; border-bottom: 1px solid var(--border); }
-    td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
-    tr:last-child td { border-bottom: none; }
-    .pill {
+    th {
+      text-align: left;
+      color: var(--cyan);
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    td {
+      padding: 7px 6px;
+      border-bottom: 1px solid rgba(26,58,92,0.4);
+      color: var(--text);
+    }
+    tr.active {
+      background: rgba(34,211,238,0.08);
+    }
+
+    /* HRV graph */
+    .hrv-graph {
+      height: 100px;
+      position: relative;
+      border-left: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .hrv-graph svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Tag */
+    .tag {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
+    .tag-success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .tag-warning { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,191,36,0.3); }
+    .tag-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+    .tag-info { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(34,211,238,0.3); }
 
-    .tag { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; background: var(--surface-2); border: 1px solid var(--border); }
-    .tag-accent { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.35); color: #a5b4fc; }
-    .tag-success { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.3); color: #6ee7b7; }
-    .tag-warning { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); color: #fcd34d; }
+    /* Tech data */
+    .tech-line {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 3px 0;
+      border-bottom: 1px dotted rgba(26,58,92,0.3);
+    }
+    .tech-line .label { color: var(--text-muted); }
+    .tech-line .value { color: var(--cyan); }
 
-    .empty {
-      padding: 24px;
-      text-align: center;
+    footer {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
       color: var(--text-muted);
-      border: 1px dashed var(--border);
-      border-radius: 16px;
     }
 
-    .timeline { display: grid; gap: 10px; }
-    .timeline-item { display: flex; gap: 12px; align-items: flex-start; }
-    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); margin-top: 6px; }
-    .timeline-content { flex: 1; }
-    .timeline-title { font-weight: 600; font-size: 14px; }
-    .timeline-meta { font-size: 12px; color: var(--text-muted); }
-
-    footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12px; display: flex; justify-content: space-between; }
-    a { color: var(--accent-3); }
+    @media (max-width: 980px) {
+      header, .main-grid { grid-template-columns: 1fr; }
+      .sub-grid-2, .sub-grid-3, .sub-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .sub-grid-2, .sub-grid-3, .sub-grid-4 { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
+  <div class="grid-bg"></div>
   <div class="container">
     <header>
-      <div class="logo">
-        <div class="logo-mark">C</div>
-        <div class="title-group">
-          <h1>Cerebro — HIIF Ecosystem Dashboard</h1>
-          <p>Mapeamento vivo de skills, frameworks, padrões e evoluções.</p>
+      <div class="panel">
+        <div class="panel-title">Full Analysis</div>
+        <div class="code-block">
+          <span class="comment">// NEURAL STRUCTURES</span><br>
+          <span class="keyword">struct</span> <span class="type">GROUP_INFO</span> {<br>
+          &nbsp;&nbsp;<span class="key">char</span> label[32];<br>
+          &nbsp;&nbsp;<span class="key">int</span> voxels;<br>
+          &nbsp;&nbsp;<span class="key">float</span> intensity;<br>
+          &nbsp;&nbsp;<span class="key">uint32_t</span> flags;<br>
+          };
         </div>
       </div>
-      <div class="badge" id="status">Atualizando...</div>
+
+      <div class="panel" style="text-align:center">
+        <div class="vital-row" style="justify-content:center">
+          <div>
+            <div class="vital-number" id="vital-main">120.8</div>
+            <div class="vital-unit">/ 60.0 mmHg</div>
+          </div>
+        </div>
+        <div class="waveform">
+          <svg viewBox="0 0 800 60" preserveAspectRatio="none">
+            <path d="M0,30 Q20,10 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30"
+                  fill="none" stroke="var(--cyan)" stroke-width="1.5" opacity="0.9">
+              <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                values="
+                  M0,30 Q20,10 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30;
+                  M0,30 Q20,40 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30;
+                  M0,30 Q20,10 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30
+                "/>
+            </path>
+          </svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">System Status</div>
+        <div style="display:grid; gap:10px; margin-top:6px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
+              <span style="color:var(--text-muted)">INFILTRATION</span>
+              <span class="tag tag-success">HEALTHY</span>
+            </div>
+            <div class="status-bar"><div class="status-bar-fill green" style="width:12%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
+              <span style="color:var(--text-muted)">PNEUMOTHORAX</span>
+              <span class="tag tag-warning">WATCH</span>
+            </div>
+            <div class="status-bar"><div class="status-bar-fill orange" style="width:45%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
+              <span style="color:var(--text-muted)">EDEMA</span>
+              <span class="tag tag-danger">RISK</span>
+            </div>
+            <div class="status-bar"><div class="status-bar-fill red" style="width:82%"></div></div>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <div class="grid grid-cols-4" id="kpis">
-      <div class="card"><h3>Referências</h3><div class="value" id="kpi-refs">—</div><div class="sub">Base internacional</div></div>
-      <div class="card"><h3>Padrões</h3><div class="value" id="kpi-patterns">—</div><div class="sub">Biblioteca HIIF</div></div>
-      <div class="card"><h3>Evoluções</h3><div class="value" id="kpi-evolutions">—</div><div class="sub">Custom Evolution</div></div>
-      <div class="card"><h3>Tecnologias</h3><div class="value" id="kpi-techs">—</div><div class="sub">Stack catalogado</div></div>
-    </div>
+    <div class="main-grid">
+      <div class="left-column">
+        <div class="panel brain-container">
+          <div class="brain-wireframe">
+            <div class="brain-hex"></div>
+            <div class="brain-hex"></div>
+            <div class="brain-hex"></div>
+            <div class="brain-center" id="brain-score">90</div>
+          </div>
+          <div class="brain-score-label">NEURAL CORE SCORE</div>
+        </div>
 
-    <div class="grid grid-cols-2" style="margin-top:16px">
-      <div class="panel">
-        <h2>🧠 Evoluções Customizadas</h2>
-        <div id="evolutions">Carregando...</div>
-      </div>
-      <div class="panel">
-        <h2>🗂️ Padrões por Categoria</h2>
-        <div id="patterns">Carregando...</div>
-      </div>
-    </div>
+        <div class="panel">
+          <div class="panel-title">Specialized Analytics</div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>NAME</th><th>BF</th><th>BV</th><th>MTT</th><th>TTP</th><th>TDT</th><th>RT</th><th>TMAX</th><th>AREA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="active">
+                  <td style="color:var(--cyan)">Artery</td>
+                  <td>120.00</td><td>8.00</td><td>2.27</td><td>14.35</td><td>14.35</td><td>0.98</td><td>14.35</td><td>120.00</td>
+                </tr>
+                <tr>
+                  <td>Vein</td>
+                  <td>115.00</td><td>7.50</td><td>2.45</td><td>15.20</td><td>15.20</td><td>1.10</td><td>15.20</td><td>115.00</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--orange)">6L</td>
+                  <td>108.00</td><td>6.80</td><td>2.60</td><td>16.10</td><td>16.10</td><td>1.25</td><td>16.10</td><td>108.00</td>
+                </tr>
+                <tr>
+                  <td>6R</td>
+                  <td>112.00</td><td>7.20</td><td>2.50</td><td>15.50</td><td>15.50</td><td>1.05</td><td>15.50</td><td>112.00</td>
+                </tr>
+                <tr>
+                  <td style="color:var(--text-muted)">%Diff</td>
+                  <td>3.6%</td><td>5.7%</td><td>4.2%</td><td>2.1%</td><td>2.1%</td><td>3.8%</td><td>2.1%</td><td>3.6%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-    <div class="grid grid-cols-2" style="margin-top:16px">
-      <div class="panel">
-        <h2>🌐 Referências</h2>
-        <div id="references">Carregando...</div>
+        <div class="panel">
+          <div class="panel-title">Signal Processing</div>
+          <div style="display:grid; gap:6px;">
+            <div class="tech-line"><span class="label">DL/LABEL/UR</span><span class="value">6.2</span></div>
+            <div class="tech-line"><span class="label">HTD</span><span class="value">102.27</span></div>
+            <div class="tech-line"><span class="label">PDS</span><span class="value">1.28 / 1.72</span></div>
+            <div class="tech-line"><span class="label">ZOOM</span><span class="value">1 / 4</span></div>
+            <div class="tech-line"><span class="label">ECHO</span><span class="value">1 / 1</span></div>
+            <div class="tech-line"><span class="label">SLICE</span><span class="value">14 / 35</span></div>
+            <div class="tech-line"><span class="label">DST</span><span class="value">14 / 35</span></div>
+          </div>
+        </div>
       </div>
-      <div class="panel">
-        <h2>⚡ Stack Tecnológico</h2>
-        <div id="techstack">Carregando...</div>
-      </div>
-    </div>
 
-    <div class="panel" style="margin-top:16px">
-      <h2>🧩 Mapa de Skills/Frameworks</h2>
-      <div id="skillsmap">Carregando...</div>
+      <div class="right-column">
+        <div class="sub-grid sub-grid-3">
+          <div class="panel" style="text-align:center">
+            <div class="gauge" style="--pct:46; margin:0 auto;">
+              <div class="gauge-inner">46</div>
+            </div>
+            <div class="gauge-label">EEG</div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">Detect abnormalities</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">
+              <span class="tag tag-info">Epilepsy</span>
+              <span class="tag tag-info">Sleep</span>
+              <span class="tag tag-info">Cognitive</span>
+            </div>
+          </div>
+
+          <div class="panel" style="text-align:center">
+            <div class="gauge" style="--pct:90; margin:0 auto;">
+              <div class="gauge-inner">90</div>
+            </div>
+            <div class="gauge-label">FMRI</div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">Blood oxygenation & flow</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">
+              <span class="tag tag-success">Tumor</span>
+              <span class="tag tag-warning">Stroke</span>
+              <span class="tag tag-info">Mental</span>
+            </div>
+          </div>
+
+          <div class="panel" style="text-align:center">
+            <div class="gauge" style="--pct:85; margin:0 auto;">
+              <div class="gauge-inner" style="color:var(--green)">85</div>
+            </div>
+            <div class="gauge-label">HRV</div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">Heart rate variability</div>
+            <div style="margin-top:8px;"><span class="tag tag-success">NORMAL</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div class="panel-title" style="margin:0">Heart Rate Variability</div>
+            <span class="tag tag-success">NORMAL</span>
+          </div>
+          <div class="hrv-graph">
+            <svg viewBox="0 0 800 100" preserveAspectRatio="none">
+              <path d="M0,50 L40,50 L50,20 L60,80 L70,40 L80,60 L120,50 L160,50 L170,30 L180,70 L190,45 L200,55 L240,50 L280,50 L290,25 L300,75 L310,40 L320,60 L360,50 L400,50 L410,35 L420,65 L430,45 L440,55 L480,50 L520,50 L530,20 L540,80 L550,40 L560,60 L600,50 L640,50 L650,30 L660,70 L670,45 L680,55 L720,50 L760,50 L770,25 L780,75 L790,40 L800,50"
+                    fill="none" stroke="var(--cyan)" stroke-width="2">
+                <animate attributeName="d" dur="4s" repeatCount="indefinite"
+                  values="
+                    M0,50 L40,50 L50,20 L60,80 L70,40 L80,60 L120,50 L160,50 L170,30 L180,70 L190,45 L200,55 L240,50 L280,50 L290,25 L300,75 L310,40 L320,60 L360,50 L400,50 L410,35 L420,65 L430,45 L440,55 L480,50 L520,50 L530,20 L540,80 L550,40 L560,60 L600,50 L640,50 L650,30 L660,70 L670,45 L680,55 L720,50 L760,50 L770,25 L780,75 L790,40 L800,50;
+                    M0,50 L40,50 L50,40 L60,60 L70,35 L80,65 L120,50 L160,50 L170,50 L180,50 L190,50 L200,50 L240,50 L280,50 L290,45 L300,55 L310,40 L320,60 L360,50 L400,50 L410,40 L420,60 L430,45 L440,55 L480,50 L520,50 L530,30 L540,70 L550,35 L560,65 L600,50 L640,50 L650,40 L660,60 L670,45 L680,55 L720,50 L760,50 L770,45 L780,55 L790,40 L800,50;
+                    M0,50 L40,50 L50,20 L60,80 L70,40 L80,60 L120,50 L160,50 L170,30 L180,70 L190,45 L200,55 L240,50 L280,50 L290,25 L300,75 L310,40 L320,60 L360,50 L400,50 L410,35 L420,65 L430,45 L440,55 L480,50 L520,50 L530,20 L540,80 L550,40 L560,60 L600,50 L640,50 L650,30 L660,70 L670,45 L680,55 L720,50 L760,50 L770,25 L780,75 L790,40 L800,50
+                  "/>
+              </path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="sub-grid sub-grid-2">
+          <div class="panel" style="text-align:center">
+            <div style="font-family:'Orbitron',sans-serif;font-size:56px;font-weight:700;color:var(--green);text-shadow:0 0 20px var(--green-dim);">90</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:4px;">CENTER SCORE</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:2px;">216.4 / 90</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">
+              <span class="tag tag-info">ERP</span>
+              <span class="tag tag-info">GSR</span>
+              <span class="tag tag-info">NIR</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">Cognitive Metrics</div>
+            <div class="radar">
+              <svg viewBox="0 0 100 100">
+                <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+                <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="rgba(34,211,238,0.1)" stroke="var(--cyan)" stroke-width="1"/>
+                <polygon points="50,20 80,40 80,70 50,88 20,70 20,40" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>
+                <polygon points="50,30 70,45 70,65 50,80 30,65 30,45" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>
+                <line x1="50" y1="50" x2="50" y2="10" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+                <line x1="50" y1="50" x2="90" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+                <line x1="50" y1="50" x2="90" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+                <line x1="50" y1="50" x2="50" y2="95" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+                <line x1="50" y1="50" x2="10" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+                <line x1="50" y1="50" x2="10" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+                <circle cx="50" cy="50" r="3" fill="var(--cyan)"/>
+              </svg>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:10px;">
+              <div><span style="color:var(--green)">97/88</span> <span style="color:var(--text-muted)">VITESSE</span></div>
+              <div><span style="color:var(--cyan)">92/90</span> <span style="color:var(--text-muted)">TIRS</span></div>
+              <div><span style="color:var(--orange)">90/57</span> <span style="color:var(--text-muted)">PASSES</span></div>
+              <div><span style="color:var(--text-muted)">60/85</span> <span style="color:var(--text-muted)">DEFENSE</span></div>
+              <div><span style="color:var(--purple)">96/89</span> <span style="color:var(--text-muted)">DRIBBLES</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <footer>
-      <span>HIIF v1.0.0</span>
-      <a href="https://github.com/flavio-guedes/Cerebro" target="_blank">flavio-guedes/Cerebro</a>
+      <span>CEREBRO // HIIF NEURAL ANALYTICS v1.0.0</span>
+      <a href="https://github.com/flavio-guedes/Cerebro" target="_blank" style="color:var(--cyan);text-decoration:none;">flavio-guedes/Cerebro</a>
     </footer>
   </div>
 
   <script>
-    async function loadJSON(path) {
-      const res = await fetch(path);
-      if (!res.ok) throw new Error('Failed: ' + path + ' ' + res.status);
-      return res.json();
+    // Simula atualização de dados em tempo real
+    function jitter(val, range) {
+      return (val + (Math.random() - 0.5) * range).toFixed(1);
     }
-
-    function el(tag, cls, text) {
-      const e = document.createElement(tag);
-      if (cls) e.className = cls;
-      if (text !== undefined && text !== null) e.textContent = text;
-      return e;
-    }
-
-    function pill(text, cls) {
-      const p = el('span', 'pill', text);
-      if (cls) p.style.borderColor = cls;
-      return p;
-    }
-
-    async function init() {
-      const refs = await loadJSON('./data/references.json');
-      const patterns = await loadJSON('./data/patterns.json');
-      const evolutions = await loadJSON('./data/custom-evolutions.json');
-
-      document.getElementById('status').textContent = `Atualizado em ${new Date().toLocaleString('pt-BR')}`;
-
-      document.getElementById('kpi-refs').textContent = String(refs.stats?.total ?? refs.references?.length ?? 0);
-      document.getElementById('kpi-patterns').textContent = String(patterns.meta?.total_patterns ?? 0);
-      document.getElementById('kpi-evolutions').textContent = String(evolutions.meta?.total_evolutions ?? evolutions.custom_evolutions?.length ?? 0);
-
-      const techCount = new Set();
-      (refs.references || []).forEach(r => {
-        const ts = r.tech_stack || {};
-        Object.values(ts).forEach(v => { if (v && v !== 'Unknown' && v !== 'DESCONHECIDA') techCount.add(v); });
-      });
-      document.getElementById('kpi-techs').textContent = String(techCount.size);
-
-      // Evolutions
-      const evoBox = document.getElementById('evolutions');
-      evoBox.innerHTML = '';
-      if (!evolutions.custom_evolutions?.length) {
-        evoBox.appendChild(el('div', 'empty', 'Nenhuma evolução customizada registrada.'));
-      } else {
-        const list = el('div', 'timeline');
-        evolutions.custom_evolutions.forEach(e => {
-          const item = el('div', 'timeline-item');
-          item.appendChild(el('div', 'timeline-dot'));
-          const content = el('div', 'timeline-content');
-          const title = el('div', 'timeline-title', e.title);
-          const meta = el('div', 'timeline-meta', `Aplicado em: ${(e.applied_to || []).join(', ')}`);
-          content.appendChild(title);
-          content.appendChild(meta);
-          item.appendChild(content);
-          list.appendChild(item);
-        });
-        evoBox.appendChild(list);
-      }
-
-      // Patterns
-      const patBox = document.getElementById('patterns');
-      patBox.innerHTML = '';
-      const patData = patterns.patterns || {};
-      const categories = Object.keys(patData);
-      const tbl = el('table');
-      tbl.innerHTML = '<thead><tr><th>Categoria</th><th>Padrões</th><th>Exemplos</th></tr></thead><tbody></tbody>';
-      const tbody = tbl.querySelector('tbody');
-      categories.forEach(cat => {
-        const items = patData[cat] || [];
-        const row = document.createElement('tr');
-        const nameCell = el('td');
-        nameCell.innerHTML = `<span class="tag tag-accent">${cat.replace(/_/g, ' ')}</span>`;
-        const countCell = el('td', '', String(items.length));
-        const examples = el('td');
-        examples.innerHTML = items.slice(0, 3).map(i => `<span class="tag">${i.name}</span>`).join(' ');
-        row.appendChild(nameCell);
-        row.appendChild(countCell);
-        row.appendChild(examples);
-        tbody.appendChild(row);
-      });
-      patBox.appendChild(tbl);
-
-      // References
-      const refBox = document.getElementById('references');
-      refBox.innerHTML = '';
-      const refTbl = el('table');
-      refTbl.innerHTML = '<thead><tr><th>Nome</th><th>Categorias</th><th>Estilos</th><th>Fonte</th></tr></thead><tbody></tbody>';
-      const refBody = refTbl.querySelector('tbody');
-      (refs.references || []).slice(0, 12).forEach(r => {
-        const row = document.createElement('tr');
-        const name = el('td');
-        name.innerHTML = `<a href="${r.url}" target="_blank">${r.name}</a>`;
-        const cats = el('td');
-        cats.innerHTML = (r.categories || []).slice(0, 4).map(c => `<span class="tag">${c}</span>`).join(' ');
-        const styles = el('td');
-        styles.innerHTML = (r.styles || []).slice(0, 4).map(s => `<span class="tag tag-success">${s}</span>`).join(' ');
-        const source = el('td');
-        source.innerHTML = `<span class="tag tag-warning">${r.source}</span>`;
-        row.appendChild(name);
-        row.appendChild(cats);
-        row.appendChild(styles);
-        row.appendChild(source);
-        refBody.appendChild(row);
-      });
-      refBox.appendChild(refTbl);
-
-      // Tech stack
-      const techBox = document.getElementById('techstack');
-      techBox.innerHTML = '';
-      const techMap = new Map();
-      (refs.references || []).forEach(r => {
-        const ts = r.tech_stack || {};
-        Object.entries(ts).forEach(([k, v]) => {
-          if (!v || v === 'Unknown' || v === 'DESCONHECIDA') return;
-          techMap.set(v, (techMap.get(v) || 0) + 1);
-        });
-      });
-      const sorted = Array.from(techMap.entries()).sort((a, b) => b[1] - a[1]);
-      const techGrid = el('div', 'grid grid-cols-4');
-      sorted.forEach(([name, count]) => {
-        const item = el('div', 'card');
-        item.innerHTML = `<div class="sub">${name}</div><div class="value" style="font-size:22px">${count}</div>`;
-        techGrid.appendChild(item);
-      });
-      techBox.appendChild(techGrid);
-
-      // Skills map
-      const skillsBox = document.getElementById('skillsmap');
-      skillsBox.innerHTML = '';
-      const skillCategories = [
-        { label: 'Frameworks', items: ['React','Next.js','Vue','Nuxt','Angular','Svelte','SvelteKit','Astro'] },
-        { label: 'Estilização', items: ['Tailwind CSS','CSS Modules','Styled Components','Sass','Panda CSS'] },
-        { label: 'Design Systems', items: ['shadcn/ui','Radix UI','Material UI','Chakra UI','Ant Design','Mantine','Headless UI'] },
-        { label: 'Animação', items: ['GSAP','Framer Motion','Motion','Three.js','React Three Fiber','WebGL','Lottie','Rive','Lenis'] },
-        { label: 'Dados', items: ['D3.js','Recharts','Chart.js','ECharts','Nivo','Visx'] },
-      ];
-      const skillsGrid = el('div', 'grid grid-cols-3');
-      skillCategories.forEach(cat => {
-        const card = el('div', 'card');
-        card.innerHTML = `<h3>${cat.label}</h3><div style="display:flex;flex-wrap:wrap;gap:6px"></div>`;
-        const wrap = card.querySelector('div');
-        cat.items.forEach(name => {
-          const found = sorted.find(s => s[0].toLowerCase() === name.toLowerCase());
-          const t = el('span', 'tag', name);
-          if (found) {
-            t.className = 'tag tag-accent';
-            const countBadge = document.createElement('span');
-            countBadge.style.marginLeft = '6px';
-            countBadge.style.color = 'var(--text-muted)';
-            countBadge.textContent = `(${found[1]})`;
-            t.appendChild(countBadge);
-          }
-          wrap.appendChild(t);
-        });
-        skillsGrid.appendChild(card);
-      });
-      skillsBox.appendChild(skillsGrid);
-    }
-
-    init().catch(err => {
-      console.error(err);
-      document.getElementById('status').textContent = 'Erro ao carregar dados.';
-    });
+    setInterval(() => {
+      document.getElementById('vital-main').textContent = jitter(120.8, 2);
+      document.getElementById('brain-score').textContent = Math.floor(88 + Math.random() * 4);
+    }, 2000);
   </script>
 </body>
 </html>
