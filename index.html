@@ -14,7 +14,7 @@
       --surface-2: #0f2140;
       --border: #1a3a5c;
       --text: #e6f3ff;
-      --text-muted: #5a7a9a;
+      --text-muted: #a0c4e0;
       --cyan: #22d3ee;
       --cyan-dim: rgba(34,211,238,0.25);
       --green: #34d399;
@@ -93,6 +93,24 @@
     }
     .panel-title {
       font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title::before {
+      content: "";
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .panel-title--compact {
+      font-family: 'Orbitron', sans-serif;
       font-size: 9px;
       letter-spacing: 0.25em;
       color: var(--cyan);
@@ -102,7 +120,7 @@
       align-items: center;
       gap: 6px;
     }
-    .panel-title::before {
+    .panel-title--compact::before {
       content: "";
       width: 4px; height: 4px;
       border-radius: 50%;
@@ -203,24 +221,6 @@
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--cyan), transparent);
       opacity: 0.4;
-    }
-    .panel-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .panel-title::before {
-      content: "";
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 8px var(--cyan);
     }
 
     /* Brain */
@@ -400,16 +400,17 @@
       color: var(--text-muted);
     }
 
-    /* Restored P0 component styles */
+    /* Components */
     .status-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 10px;
+      gap: 10px;
+      padding: 10px 12px;
       background: var(--surface-2);
       border: 1px solid var(--border);
       border-radius: 8px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       cursor: pointer;
       transition: all 0.15s ease;
     }
@@ -421,10 +422,11 @@
     }
     .status-bar {
       width: 100px;
-      height: 5px;
+      height: 6px;
       border-radius: 3px;
       background: var(--surface);
       overflow: hidden;
+      flex-shrink: 0;
     }
     .status-fill {
       height: 100%;
@@ -459,25 +461,25 @@
   <div class="grid-bg"></div>
   <div class="container">
     <header>
-      <div class="panel">
+      <div class="panel" data-target="ecosystem">
         <div class="kpi-title">Ecossistema</div>
         <div class="metric" id="metric-ecosystem">--</div>
-        <div class="metric-sub">Módulos mapeados</div>
+        <div class="metric-sub" id="metric-ecosystem-sub">Módulos mapeados</div>
       </div>
-      <div class="panel">
+      <div class="panel" data-target="skills">
         <div class="kpi-title">Skills</div>
         <div class="metric" id="metric-skills">--</div>
-        <div class="metric-sub">Competências ativas</div>
+        <div class="metric-sub" id="metric-skills-sub">Competências ativas</div>
       </div>
-      <div class="panel">
+      <div class="panel" data-target="frameworks">
         <div class="kpi-title">Frameworks</div>
         <div class="metric" id="metric-frameworks">--</div>
-        <div class="metric-sub">Implementados</div>
+        <div class="metric-sub" id="metric-frameworks-sub">Implementados</div>
       </div>
-      <div class="panel">
+      <div class="panel" data-target="insights">
         <div class="kpi-title">Alertas</div>
         <div class="metric" id="metric-alerts" style="color:var(--orange)">--</div>
-        <div class="metric-sub">Insights ativos</div>
+        <div class="metric-sub" id="metric-alerts-sub">Insights ativos</div>
       </div>
     </header>
 
@@ -623,13 +625,12 @@
     function setDetail(html) {
       const el = document.getElementById('detail');
       if (!el) return;
-      el.innerHTML = html || '<div class=\"detail-empty\">Selecione um item para ver detalhes.</div>';
+      el.innerHTML = html || '<div class="detail-empty">Selecione um item para ver detalhes.</div>';
     }
 
     function navigateTo(tab) {
       currentTab = tab;
       document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-      document.getElementById('viewport').innerHTML = '';
       updateBrainState(tab);
       if (tab === 'radar') renderRadar();
       if (tab === 'ecosystem') renderEcosystem();
@@ -699,7 +700,8 @@
           c.setAttribute('r', '5');
           c.setAttribute('fill', colorMap[d.c] || 'var(--cyan)');
           c.setAttribute('opacity', '0.9');
-          c.style.cursor = 'pointer';
+          c.style.cursor = "pointer";
+          c.style.outline = "none";
           c.addEventListener('click', () => {
             document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'skills'));
             switchTab('skills');
@@ -836,7 +838,7 @@
             </div>
             <div class="detail-section">
               <div class="detail-label">Stack</div>
-              <div class="chips">${(project.stack || []).map(s => `<span class=\"chip\">${s}</span>`).join('')}</div>
+              <div class="chips">${(project.stack || []).map(s => `<span class="chip">${s}</span>`).join('')}</div>
             </div>
             <div class="detail-section">
               <div class="detail-label">Notas</div>
@@ -868,7 +870,7 @@
           const item = document.createElement('div');
           item.className = 'item';
           const maturityLabel = skill.maturity === 'high' ? 'ALTA' : skill.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
-          const maturityClass = skill.maturity === 'high' ? 'chip ok' : skill.maturity === 'mid' ? 'chip warn' : 'chip plan';
+          const maturityClass = skill.maturity === 'high' ? 'ok' : skill.maturity === 'mid' ? 'warn' : 'plan';
           item.innerHTML = `
             <div class="item-header">
               <span class="item-name">${skill.name}</span>
@@ -920,43 +922,67 @@
     function renderFrameworks() {
       document.getElementById('panel-title').textContent = 'Frameworks Implementados';
       const container = document.getElementById('content');
-      container.innerHTML = '<div id="frameworks-list"></div>';
-      const list = document.getElementById('frameworks-list');
-      ecosystem.frameworks.forEach(fw => {
-        const item = document.createElement('div');
-        item.className = 'item';
-        const statusClass = fw.status === 'ACTIVE' ? 'chip ok' : fw.status === 'EXPERIMENTAL' ? 'chip warn' : 'chip plan';
-        item.innerHTML = `
-          <div class="item-header">
-            <span class="item-name">${fw.name}</span>
-            <span class="chip ${statusClass}">${fw.status}</span>
-            <span class="item-expand">+</span>
-          </div>
-          <div class="item-body">
-            <div class="detail-label">Implementação</div>
-            <div class="detail-text">${fw.details}</div>
-          </div>
-        `;
-        item.addEventListener('click', () => {
-          item.classList.toggle('expanded');
-          if (item.classList.contains('expanded')) {
-            setDetail(`
-              <div class="detail-section">
-                <div class="detail-label">Framework</div>
-                <div class="detail-text">${fw.name}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Status</div>
-                <div class="detail-text">${fw.status}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Implementação</div>
-                <div class="detail-text">${fw.details}</div>
-              </div>
-            `);
-          }
+      const categories = ['all', ...new Set(ecosystem.frameworks.map(f => f.status))];
+      container.innerHTML = `
+        <div class="filters" id="framework-filters">
+          ${categories.map(c => `<button class="filter-btn ${c === 'all' ? 'active' : ''}" data-filter="${c}">${c === 'all' ? 'Todos' : c}</button>`).join('')}
+        </div>
+        <div id="frameworks-list"></div>
+      `;
+
+      function applyFrameworkFilter(status) {
+        const list = document.getElementById('frameworks-list');
+        const filtered = status === 'all' ? ecosystem.frameworks : ecosystem.frameworks.filter(f => f.status === status);
+        list.innerHTML = '';
+        if (!filtered.length) {
+          list.innerHTML = '<div class="detail-empty">Nenhum framework para este filtro.</div>';
+          return;
+        }
+        filtered.forEach(fw => {
+          const item = document.createElement('div');
+          item.className = 'item';
+          const status = statusMeta(fw.status);
+          item.innerHTML = `
+            <div class="item-header">
+              <span class="item-name">${fw.name}</span>
+              <span class="chip ${status.cssClass}">${status.label}</span>
+              <span class="item-expand">+</span>
+            </div>
+            <div class="item-body">
+              <div class="detail-label">Implementação</div>
+              <div class="detail-text">${fw.details}</div>
+            </div>
+          `;
+          item.addEventListener('click', () => {
+            item.classList.toggle('expanded');
+            if (item.classList.contains('expanded')) {
+              setDetail(`
+                <div class="detail-section">
+                  <div class="detail-label">Framework</div>
+                  <div class="detail-text">${fw.name}</div>
+                </div>
+                <div class="detail-section">
+                  <div class="detail-label">Status</div>
+                  <div class="detail-text">${status.label}</div>
+                </div>
+                <div class="detail-section">
+                  <div class="detail-label">Implementação</div>
+                  <div class="detail-text">${fw.details}</div>
+                </div>
+              `);
+            }
+          });
+          list.appendChild(item);
         });
-        list.appendChild(item);
+      }
+
+      applyFrameworkFilter('all');
+      document.querySelectorAll('#framework-filters .filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#framework-filters .filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          applyFrameworkFilter(btn.dataset.filter);
+        });
       });
     }
 
@@ -968,9 +994,8 @@
       ecosystem.maturity.forEach(m => {
         const row = document.createElement('div');
         row.className = 'status-row';
-        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all 0.15s ease;';
         row.innerHTML = `
-          <span class="status-domain" style="font-size:12px;font-weight:500;color:var(--text)">${m.domain}</span>
+          <span class="status-domain">${m.domain}</span>
           <div class="status-bar"><div class="status-fill" style="width:${m.maturity}"></div></div>
           <span class="chip ok">${m.maturity}</span>
         `;
@@ -1017,7 +1042,7 @@
         const filtered = type === 'all' ? sorted : sorted.filter(i => i.type === type);
         list.innerHTML = '';
         if (!filtered.length) {
-          list.innerHTML = '<div class=\"detail-empty\">Nenhum insight para este filtro.</div>';
+          list.innerHTML = '<div class="detail-empty">Nenhum insight para este filtro.</div>';
           return;
         }
         filtered.forEach(ins => {
@@ -1027,33 +1052,33 @@
           const typeClass = ins.type === 'alert' ? 'chip danger' : ins.type === 'opportunity' ? 'chip ok' : ins.type === 'fragility' ? 'chip warn' : 'chip plan';
           const sev = severityMeta(ins.severity);
           el.innerHTML = `
-            <div class=\"insight-header\">
-              <span class=\"insight-title\">${ins.title}</span>
-              <span class=\"insight-type ${typeClass}\">${typeLabel}</span>
+            <div class="insight-header">
+              <span class="insight-title">${ins.title}</span>
+              <span class="insight-type ${typeClass}">${typeLabel}</span>
             </div>
-            <div style=\"font-size:11px;color:var(--text-muted);margin-top:4px;\">${ins.desc}</div>
-            <div class=\"chips\" style=\"margin-top:6px;\">
-              <span class=\"chip ${sev.cssClass}\">${sev.label}</span>
-              ${(ins.projects || []).map(p => `<span class=\"chip\">${p}</span>`).join('')}
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${ins.desc}</div>
+            <div class="chips" style="margin-top:6px;">
+              <span class="chip ${sev.cssClass}">${sev.label}</span>
+              ${(ins.projects || []).map(p => `<span class="chip">${p}</span>`).join('')}
             </div>
           `;
           makeItemClickable(el, () => {
             setDetail(`
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Tipo</div>
-                <div class=\"detail-text\">${typeLabel}</div>
+              <div class="detail-section">
+                <div class="detail-label">Tipo</div>
+                <div class="detail-text">${typeLabel}</div>
               </div>
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Severidade</div>
-                <div class=\"detail-text\">${sev.label}</div>
+              <div class="detail-section">
+                <div class="detail-label">Severidade</div>
+                <div class="detail-text">${sev.label}</div>
               </div>
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Descrição</div>
-                <div class=\"detail-text\">${ins.desc}</div>
+              <div class="detail-section">
+                <div class="detail-label">Descrição</div>
+                <div class="detail-text">${ins.desc}</div>
               </div>
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Projetos</div>
-                <div class=\"chips\">${(ins.projects || []).map(p => `<span class=\"chip\">${p}</span>`).join('')}</div>
+              <div class="detail-section">
+                <div class="detail-label">Projetos</div>
+                <div class="chips">${(ins.projects || []).map(p => `<span class="chip">${p}</span>`).join('')}</div>
               </div>
             `);
           });
@@ -1076,26 +1101,29 @@
     }
 
     function init() {
+      const activeProjects = ecosystem.projects.filter(p => p.status === 'ACTIVE').length;
       document.getElementById('metric-ecosystem').textContent = String(ecosystem.projects.length);
       document.getElementById('metric-skills').textContent = String(ecosystem.skills.length);
       document.getElementById('metric-frameworks').textContent = String(ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length);
       document.getElementById('metric-alerts').textContent = String(ecosystem.insights.filter(i => i.type === 'alert').length);
 
+      const alertInsights = ecosystem.insights.filter(i => i.type === 'alert').length;
+      const highInsights = ecosystem.insights.filter(i => i.severity === 'high').length;
+      document.getElementById('metric-alerts-sub').textContent = alertInsights > 0 ? `${alertInsights} insight(s), ${highInsights} crítico(s)` : 'Sem alertas ativos';
+
+      const activeFrameworks = ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length;
+      const totalFrameworks = ecosystem.frameworks.length;
+      document.getElementById('metric-frameworks-sub').textContent = `${activeFrameworks}/${totalFrameworks} ativos`;
+
+      document.getElementById('metric-ecosystem-sub').textContent = `${activeProjects} em produção`;
+      document.getElementById('metric-skills-sub').textContent = `${ecosystem.skills.filter(s => s.maturity === 'high').length} de alta maturidade`;
+
       document.querySelectorAll('.nav button').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
       });
 
-      document.querySelectorAll('.panel').forEach(panel => {
-        const titleEl = panel.querySelector('.kpi-title');
-        if (!titleEl) return;
-        const tab = titleEl.textContent.trim().toLowerCase();
-        let target = null;
-        if (tab === 'ecossistema') target = 'ecosystem';
-        else if (tab === 'skills') target = 'skills';
-        else if (tab === 'frameworks') target = 'frameworks';
-        else if (tab === 'alertas') target = 'insights';
-        if (!target) return;
-        makeItemClickable(panel, () => switchTab(target));
+      document.querySelectorAll('.panel[data-target]').forEach(panel => {
+        makeItemClickable(panel, () => switchTab(panel.dataset.target));
       });
 
       updateBrainState('radar');
