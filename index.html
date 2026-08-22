@@ -468,6 +468,84 @@
     @media (max-width: 640px) {
       header { grid-template-columns: 1fr; }
     }
+
+    /* Command Bar */
+    .command-bar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      position: relative;
+    }
+    .command-bar__prefix {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+    .command-bar__input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      outline: none;
+    }
+    .command-bar__results {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      display: none;
+    }
+    .command-bar__results.open { display: block; }
+    .command-bar__item {
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .command-bar__item:hover, .command-bar__item.active {
+      background: var(--surface-2);
+      color: var(--cyan);
+    }
+
+    /* Insight actions */
+    .insight-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .insight-action {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 5px 8px;
+      border-radius: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .insight-action:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-dim);
+    }
+    .insight-feedback {
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--green);
+      min-height: 14px;
+    }
   </style>
 </head>
 <body>
@@ -495,6 +573,12 @@
         <div class="metric-sub" id="metric-alerts-sub">Insights ativos</div>
       </div>
     </header>
+
+    <div class="command-bar">
+      <span class="command-bar__prefix">⌘K</span>
+      <input class="command-bar__input" id="command-input" placeholder="Digite um comando..." autocomplete="off" />
+      <div class="command-bar__results" id="command-results" aria-live="polite"></div>
+    </div>
 
     <nav class="nav">
       <button class="active" data-tab="radar">Raio-X</button>
@@ -1134,6 +1218,30 @@
               ${(ins.projects || []).map(p => `<span class="chip">${p}</span>`).join('')}
             </div>
           `;
+          const actions = document.createElement('div');
+          actions.className = 'insight-actions';
+          actions.innerHTML = `
+            <button class="insight-action" data-action="mark-read">Marcar como visto</button>
+            <button class="insight-action" data-action="archive">Arquivar</button>
+            <button class="insight-action" data-action="next-step">Próximo passo</button>
+          `;
+          actions.querySelectorAll('.insight-action').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const action = btn.dataset.action;
+              if (action === 'mark-read') {
+                el.style.opacity = '0.7';
+                el.setAttribute('data-status', 'read');
+                showFeedback('Insight marcado como visto.');
+              } else if (action === 'archive') {
+                el.remove();
+                showFeedback('Insight arquivado.');
+              } else if (action === 'next-step') {
+                showFeedback('Próximo passo criado: ação simulada.');
+              }
+            });
+          });
+          el.appendChild(actions);
           makeItemClickable(el, () => {
             setDetail(`
               <div class="detail-section">
@@ -1170,6 +1278,130 @@
 
     function switchTab(tab) {
       navigateTo(tab);
+    }
+
+    const commands = [
+      { id: 'tab-radar', label: 'Ir para Raio-X', action: () => switchTab('radar') },
+      { id: 'tab-ecosystem', label: 'Ir para Ecossistema', action: () => switchTab('ecosystem') },
+      { id: 'tab-skills', label: 'Ir para Skills', action: () => switchTab('skills') },
+      { id: 'tab-competencies', label: 'Ir para Competências', action: () => switchTab('competencies') },
+      { id: 'tab-frameworks', label: 'Ir para Frameworks', action: () => switchTab('frameworks') },
+      { id: 'tab-maturity', label: 'Ir para Maturidade', action: () => switchTab('maturity') },
+      { id: 'tab-insights', label: 'Ir para Insights', action: () => switchTab('insights') },
+      { id: 'insight-mark-read', label: 'Marcar insight como visto', action: () => markInsightsRead() },
+      { id: 'insight-archive', label: 'Arquivar insights selecionados', action: () => archiveInsights() },
+      { id: 'insight-next-step', label: 'Criar próximo passo', action: () => createNextStep() }
+    ];
+
+    function initCommandBar() {
+      const input = document.getElementById('command-input');
+      const results = document.getElementById('command-results');
+      if (!input || !results) return;
+
+      let activeIndex = -1;
+
+      function render(list) {
+        results.innerHTML = '';
+        if (!list.length) {
+          results.classList.remove('open');
+          activeIndex = -1;
+          return;
+        }
+        activeIndex = 0;
+        list.forEach((cmd, idx) => {
+          const item = document.createElement('div');
+          item.className = `command-bar__item ${idx === 0 ? 'active' : ''}`;
+          item.textContent = cmd.label;
+          item.addEventListener('click', () => executeCommand(cmd));
+          results.appendChild(item);
+        });
+        results.classList.add('open');
+      }
+
+      function executeCommand(cmd) {
+        results.classList.remove('open');
+        results.innerHTML = '';
+        input.value = '';
+        activeIndex = -1;
+        cmd.action();
+      }
+
+      input.addEventListener('input', () => {
+        const value = input.value.trim().toLowerCase();
+        const filtered = commands.filter(c => c.label.toLowerCase().includes(value));
+        render(filtered);
+      });
+
+      input.addEventListener('keydown', (e) => {
+        const items = results.querySelectorAll('.command-bar__item');
+        if (!results.classList.contains('open')) return;
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeIndex = Math.min(activeIndex + 1, items.length - 1);
+          updateActive(items);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeIndex = Math.max(activeIndex - 1, 0);
+          updateActive(items);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const active = items[activeIndex];
+          if (active) active.click();
+        } else if (e.key === 'Escape') {
+          results.classList.remove('open');
+          results.innerHTML = '';
+          activeIndex = -1;
+        }
+      });
+
+      function updateActive(items) {
+        items.forEach((item, idx) => item.classList.toggle('active', idx === activeIndex));
+      }
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.command-bar')) {
+          results.classList.remove('open');
+          results.innerHTML = '';
+        }
+      });
+    }
+
+    function markInsightsRead() {
+      const list = document.getElementById('insights-list');
+      if (!list) return;
+      const items = list.querySelectorAll('.insight');
+      items.forEach(el => {
+        el.style.opacity = '0.7';
+        el.setAttribute('data-status', 'read');
+      });
+      showFeedback('Insights marcados como vistos.');
+    }
+
+    function archiveInsights() {
+      const list = document.getElementById('insights-list');
+      if (!list) return;
+      const items = list.querySelectorAll('.insight');
+      items.forEach(el => el.remove());
+      showFeedback('Insights arquivados.');
+    }
+
+    function createNextStep() {
+      showFeedback('Próximo passo criado: ação simulada.');
+    }
+
+    function showFeedback(message) {
+      let feedback = document.querySelector('.insight-feedback');
+      if (!feedback) {
+        feedback = document.createElement('div');
+        feedback.className = 'insight-feedback';
+        feedback.setAttribute('aria-live', 'polite');
+        const content = document.getElementById('content');
+        if (content) content.appendChild(feedback);
+      }
+      feedback.textContent = message;
+      setTimeout(() => {
+        feedback.textContent = '';
+      }, 2000);
     }
 
     function init() {

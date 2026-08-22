@@ -55,6 +55,13 @@ check('keyboard activation exists', html.includes("e.key === 'Enter'") && html.i
 check('text-muted contrast improved', html.includes('--text-muted: #a0c4e0'), 'Token --text-muted ajustado para contraste AA');
 check('focus visible styles exist', html.includes(':focus-visible') || html.includes(':focus'), 'Estilos de foco visível existem');
 
+// EVOLUTION 06 checks
+check('command bar exists', html.includes('id="command-input"') && html.includes('id="command-results"'), 'Central Command Bar existe');
+check('insights have actions', html.includes('insight-actions') && html.includes('data-action="mark-read"'), 'Insights tem ações associadas');
+check('feedback mechanism exists', html.includes('insight-feedback') && html.includes('showFeedback'), 'Mecanismo de feedback existe');
+check('commands include navigation', html.includes("label: 'Ir para Insights'") && html.includes("label: 'Ir para Ecossistema'"), 'Comandos incluem navegação');
+check('commands include actions', html.includes("label: 'Marcar insight como visto'") && html.includes("label: 'Criar próximo passo'"), 'Comandos incluem ações');
+
 const passed = results.filter(r => r.pass).length;
 const failed = results.filter(r => !r.pass);
 
