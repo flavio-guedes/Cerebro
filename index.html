@@ -916,8 +916,9 @@
             </div>
           `;
           item.addEventListener('click', () => {
-            item.classList.toggle('expanded');
-            if (item.classList.contains('expanded')) {
+            const expanded = item.classList.toggle('expanded');
+            item.setAttribute('aria-expanded', String(expanded));
+            if (expanded) {
               setDetail(`
                 <div class="detail-section">
                   <div class="detail-label">Skill</div>
@@ -970,8 +971,9 @@
           </div>
         `;
         item.addEventListener('click', () => {
-          item.classList.toggle('expanded');
-          if (item.classList.contains('expanded')) {
+          const expanded = item.classList.toggle('expanded');
+          item.setAttribute('aria-expanded', String(expanded));
+          if (expanded) {
             setDetail(`
               <div class="detail-section">
                 <div class="detail-label">Competência</div>
@@ -1023,8 +1025,9 @@
             </div>
           `;
           item.addEventListener('click', () => {
-            item.classList.toggle('expanded');
-            if (item.classList.contains('expanded')) {
+            const expanded = item.classList.toggle('expanded');
+            item.setAttribute('aria-expanded', String(expanded));
+            if (expanded) {
               setDetail(`
                 <div class="detail-section">
                   <div class="detail-label">Framework</div>
