@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cerebro — Neural Analytics Command</title>
+  <title>Cerebro — Hermes Ecosystem Radar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@
     /* Header */
     header {
       display: grid;
-      grid-template-columns: 1fr 2fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 16px;
       align-items: start;
       margin-bottom: 20px;
@@ -109,40 +109,19 @@
       box-shadow: 0 0 8px var(--cyan);
     }
 
-    /* Code block */
-    .code-block {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      line-height: 1.5;
-      color: var(--text-muted);
-      background: rgba(0,0,0,0.3);
-      padding: 10px;
-      border-radius: 4px;
-      border-left: 2px solid var(--cyan);
-    }
-    .code-block .key { color: var(--purple); }
-    .code-block .type { color: var(--orange); }
-    .code-block .comment { color: #3a5a7a; font-style: italic; }
-
-    /* Vital signs */
-    .vital-row {
+    /* Metrics */
+    .metric-row {
       display: flex;
       gap: 16px;
       align-items: center;
     }
-    .vital-number {
+    .metric-number {
       font-family: 'Orbitron', sans-serif;
       font-size: 42px;
       font-weight: 700;
       color: var(--cyan);
       text-shadow: 0 0 20px var(--cyan-dim);
       line-height: 1;
-    }
-    .vital-unit {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
     }
 
     /* Main grid */
@@ -170,128 +149,79 @@
     }
     .sub-grid-2 { grid-template-columns: repeat(2, 1fr); }
     .sub-grid-3 { grid-template-columns: repeat(3, 1fr); }
-    .sub-grid-4 { grid-template-columns: repeat(4, 1fr); }
 
-    /* Brain */
-    .brain-container {
-      position: relative;
-      height: 360px;
+    /* Skills list */
+    .skill-list {
       display: grid;
-      place-items: center;
-      background: radial-gradient(circle at center, rgba(34,211,238,0.08), transparent 70%);
+      gap: 8px;
     }
-    .brain-wireframe {
-      width: 260px;
-      height: 260px;
-      position: relative;
-      animation: rotate 30s linear infinite;
-    }
-    @keyframes rotate {
-      from { transform: rotateX(15deg) rotateY(0deg); }
-      to { transform: rotateX(15deg) rotateY(360deg); }
-    }
-    .brain-hex {
-      position: absolute;
-      inset: 0;
-      border: 1px solid var(--cyan);
-      border-radius: 50%;
-      opacity: 0.3;
-      box-shadow: 0 0 30px var(--cyan-dim), inset 0 0 30px var(--cyan-dim);
-    }
-    .brain-hex:nth-child(2) { inset: 20px; opacity: 0.5; animation: pulse 4s ease-in-out infinite; }
-    .brain-hex:nth-child(3) { inset: 40px; opacity: 0.7; animation: pulse 4s ease-in-out infinite 1s; }
-    .brain-center {
-      position: absolute;
-      inset: 60px;
-      border: 2px solid var(--cyan);
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 64px;
-      font-weight: 700;
-      color: var(--cyan);
-      text-shadow: 0 0 30px var(--cyan);
-      background: radial-gradient(circle, var(--cyan-dim), transparent);
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.02); }
-    }
-    .brain-score-label {
-      position: absolute;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      letter-spacing: 0.15em;
-    }
-
-    /* Gauges */
-    .gauge {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      background: conic-gradient(var(--cyan) var(--pct, 46%), var(--surface-2) 0);
-      display: grid;
-      place-items: center;
-      box-shadow: 0 0 20px var(--cyan-dim);
-    }
-    .gauge-inner {
-      width: 82px;
-      height: 82px;
-      border-radius: 50%;
-      background: var(--surface);
-      display: grid;
-      place-items: center;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--cyan);
-    }
-    .gauge-label {
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 8px;
-      letter-spacing: 0.1em;
-    }
-
-    /* Status bars */
-    .status-bar {
-      height: 6px;
-      border-radius: 3px;
+    .skill-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
       background: var(--surface-2);
-      overflow: hidden;
-      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
     }
-    .status-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 0.6s ease;
+    .skill-name {
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .status-bar-fill.green { background: var(--green); box-shadow: 0 0 8px var(--green-dim); }
-    .status-bar-fill.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange-dim); }
-    .status-bar-fill.red { background: var(--red); box-shadow: 0 0 8px var(--red-dim); }
+    .skill-name::before {
+      content: "";
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+    }
+    .skill-maturity {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .maturity-high { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .maturity-mid { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,191,36,0.3); }
+    .maturity-low { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
 
-    /* Wave */
-    .waveform {
-      height: 60px;
-      background: linear-gradient(180deg, transparent, rgba(34,211,238,0.05));
-      border-top: 1px solid var(--border);
+    /* Frameworks grid */
+    .framework-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .framework-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
       position: relative;
       overflow: hidden;
     }
-    .waveform svg {
+    .framework-card::before {
+      content: "";
       position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 200%;
-      height: 100%;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    }
+    .framework-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .framework-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
     }
 
     /* Radar */
@@ -299,7 +229,7 @@
       position: relative;
       width: 100%;
       aspect-ratio: 1;
-      max-width: 220px;
+      max-width: 280px;
       margin: 0 auto;
     }
     .radar svg {
@@ -333,18 +263,6 @@
       background: rgba(34,211,238,0.08);
     }
 
-    /* HRV graph */
-    .hrv-graph {
-      height: 100px;
-      position: relative;
-      border-left: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-    .hrv-graph svg {
-      width: 100%;
-      height: 100%;
-    }
-
     /* Tag */
     .tag {
       display: inline-flex;
@@ -362,18 +280,6 @@
     .tag-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
     .tag-info { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(34,211,238,0.3); }
 
-    /* Tech data */
-    .tech-line {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      padding: 3px 0;
-      border-bottom: 1px dotted rgba(26,58,92,0.3);
-    }
-    .tech-line .label { color: var(--text-muted); }
-    .tech-line .value { color: var(--cyan); }
-
     footer {
       margin-top: 24px;
       padding-top: 12px;
@@ -387,10 +293,10 @@
 
     @media (max-width: 980px) {
       header, .main-grid { grid-template-columns: 1fr; }
-      .sub-grid-2, .sub-grid-3, .sub-grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .sub-grid-2, .sub-grid-3 { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
-      .sub-grid-2, .sub-grid-3, .sub-grid-4 { grid-template-columns: 1fr; }
+      .sub-grid-2, .sub-grid-3 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -399,37 +305,20 @@
   <div class="container">
     <header>
       <div class="panel">
-        <div class="panel-title">Full Analysis</div>
-        <div class="code-block">
-          <span class="comment">// NEURAL STRUCTURES</span><br>
-          <span class="keyword">struct</span> <span class="type">GROUP_INFO</span> {<br>
-          &nbsp;&nbsp;<span class="key">char</span> label[32];<br>
-          &nbsp;&nbsp;<span class="key">int</span> voxels;<br>
-          &nbsp;&nbsp;<span class="key">float</span> intensity;<br>
-          &nbsp;&nbsp;<span class="key">uint32_t</span> flags;<br>
-          };
+        <div class="panel-title">Hermes Ecosystem</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.6;">
+          Skills ativas: <span style="color:var(--cyan)" id="active-skills">--</span><br>
+          Habilidades principais: <span style="color:var(--cyan)" id="main-skills">--</span><br>
+          Maturidade: <span style="color:var(--green)" id="maturity-level">--</span>
         </div>
       </div>
 
       <div class="panel" style="text-align:center">
-        <div class="vital-row" style="justify-content:center">
+        <div class="metric-row" style="justify-content:center">
           <div>
-            <div class="vital-number" id="vital-main">120.8</div>
-            <div class="vital-unit">/ 60.0 mmHg</div>
+            <div class="metric-number" id="metric-frameworks">--</div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px;">FRAMEWORKS ATIVOS</div>
           </div>
-        </div>
-        <div class="waveform">
-          <svg viewBox="0 0 800 60" preserveAspectRatio="none">
-            <path d="M0,30 Q20,10 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30"
-                  fill="none" stroke="var(--cyan)" stroke-width="1.5" opacity="0.9">
-              <animate attributeName="d" dur="3s" repeatCount="indefinite"
-                values="
-                  M0,30 Q20,10 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30;
-                  M0,30 Q20,40 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30;
-                  M0,30 Q20,10 40,30 T80,30 T120,30 T160,30 T200,30 T240,30 T280,30 T320,30 T360,30 T400,30 T440,30 T480,30 T520,30 T560,30 T600,30 T640,30 T680,30 T720,30 T760,30 T800,30
-                "/>
-            </path>
-          </svg>
         </div>
       </div>
 
@@ -438,24 +327,24 @@
         <div style="display:grid; gap:10px; margin-top:6px;">
           <div>
             <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
-              <span style="color:var(--text-muted)">INFILTRATION</span>
-              <span class="tag tag-success">HEALTHY</span>
+              <span style="color:var(--text-muted)">FRONTEND</span>
+              <span class="tag tag-success">STABLE</span>
             </div>
-            <div class="status-bar"><div class="status-bar-fill green" style="width:12%"></div></div>
+            <div class="status-bar"><div class="status-bar-fill green" style="width:92%"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
-              <span style="color:var(--text-muted)">PNEUMOTHORAX</span>
-              <span class="tag tag-warning">WATCH</span>
+              <span style="color:var(--text-muted)">AUTOMAÇÃO</span>
+              <span class="tag tag-warning">EXPANDING</span>
             </div>
-            <div class="status-bar"><div class="status-bar-fill orange" style="width:45%"></div></div>
+            <div class="status-bar"><div class="status-bar-fill orange" style="width:78%"></div></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
-              <span style="color:var(--text-muted)">EDEMA</span>
-              <span class="tag tag-danger">RISK</span>
+              <span style="color:var(--text-muted)">INTEGRAÇÕES</span>
+              <span class="tag tag-success">CONNECTED</span>
             </div>
-            <div class="status-bar"><div class="status-bar-fill red" style="width:82%"></div></div>
+            <div class="status-bar"><div class="status-bar-fill green" style="width:85%"></div></div>
           </div>
         </div>
       </div>
@@ -463,179 +352,183 @@
 
     <div class="main-grid">
       <div class="left-column">
-        <div class="panel brain-container">
-          <div class="brain-wireframe">
-            <div class="brain-hex"></div>
-            <div class="brain-hex"></div>
-            <div class="brain-hex"></div>
-            <div class="brain-center" id="brain-score">90</div>
-          </div>
-          <div class="brain-score-label">NEURAL CORE SCORE</div>
+        <div class="panel">
+          <div class="panel-title">Skills & Competências</div>
+          <div class="skill-list" id="skills-list">Carregando...</div>
         </div>
 
         <div class="panel">
-          <div class="panel-title">Specialized Analytics</div>
-          <div style="overflow-x:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>NAME</th><th>BF</th><th>BV</th><th>MTT</th><th>TTP</th><th>TDT</th><th>RT</th><th>TMAX</th><th>AREA</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="active">
-                  <td style="color:var(--cyan)">Artery</td>
-                  <td>120.00</td><td>8.00</td><td>2.27</td><td>14.35</td><td>14.35</td><td>0.98</td><td>14.35</td><td>120.00</td>
-                </tr>
-                <tr>
-                  <td>Vein</td>
-                  <td>115.00</td><td>7.50</td><td>2.45</td><td>15.20</td><td>15.20</td><td>1.10</td><td>15.20</td><td>115.00</td>
-                </tr>
-                <tr>
-                  <td style="color:var(--orange)">6L</td>
-                  <td>108.00</td><td>6.80</td><td>2.60</td><td>16.10</td><td>16.10</td><td>1.25</td><td>16.10</td><td>108.00</td>
-                </tr>
-                <tr>
-                  <td>6R</td>
-                  <td>112.00</td><td>7.20</td><td>2.50</td><td>15.50</td><td>15.50</td><td>1.05</td><td>15.50</td><td>112.00</td>
-                </tr>
-                <tr>
-                  <td style="color:var(--text-muted)">%Diff</td>
-                  <td>3.6%</td><td>5.7%</td><td>4.2%</td><td>2.1%</td><td>2.1%</td><td>3.8%</td><td>2.1%</td><td>3.6%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="panel-title">Frameworks Implementados</div>
+          <div class="framework-grid" id="framework-grid">Carregando...</div>
         </div>
 
         <div class="panel">
-          <div class="panel-title">Signal Processing</div>
-          <div style="display:grid; gap:6px;">
-            <div class="tech-line"><span class="label">DL/LABEL/UR</span><span class="value">6.2</span></div>
-            <div class="tech-line"><span class="label">HTD</span><span class="value">102.27</span></div>
-            <div class="tech-line"><span class="label">PDS</span><span class="value">1.28 / 1.72</span></div>
-            <div class="tech-line"><span class="label">ZOOM</span><span class="value">1 / 4</span></div>
-            <div class="tech-line"><span class="label">ECHO</span><span class="value">1 / 1</span></div>
-            <div class="tech-line"><span class="label">SLICE</span><span class="value">14 / 35</span></div>
-            <div class="tech-line"><span class="label">DST</span><span class="value">14 / 35</span></div>
-          </div>
+          <div class="panel-title">Maturidade por Domínio</div>
+          <table>
+            <thead>
+              <tr><th>Domínio</th><th>Habilidades</th><th>Maturidade</th></tr>
+            </thead>
+            <tbody id="maturity-table">Carregando...</tbody>
+          </table>
         </div>
       </div>
 
       <div class="right-column">
-        <div class="sub-grid sub-grid-3">
-          <div class="panel" style="text-align:center">
-            <div class="gauge" style="--pct:46; margin:0 auto;">
-              <div class="gauge-inner">46</div>
-            </div>
-            <div class="gauge-label">EEG</div>
-            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">Detect abnormalities</div>
-            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">
-              <span class="tag tag-info">Epilepsy</span>
-              <span class="tag tag-info">Sleep</span>
-              <span class="tag tag-info">Cognitive</span>
-            </div>
+        <div class="panel">
+          <div class="panel-title">Raio-X do Ecossistema</div>
+          <div class="radar">
+            <svg viewBox="0 0 100 100">
+              <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+              <polygon points="50,20 80,40 80,70 50,88 20,70 20,40" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>
+              <polygon points="50,30 70,45 70,65 50,80 30,65 30,45" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>
+              <line x1="50" y1="50" x2="50" y2="10" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <line x1="50" y1="50" x2="90" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <line x1="50" y1="50" x2="90" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <line x1="50" y1="50" x2="50" y2="95" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <line x1="50" y1="50" x2="10" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <line x1="50" y1="50" x2="10" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+              <circle cx="50" cy="50" r="3" fill="var(--cyan)"/>
+            </svg>
           </div>
-
-          <div class="panel" style="text-align:center">
-            <div class="gauge" style="--pct:90; margin:0 auto;">
-              <div class="gauge-inner">90</div>
-            </div>
-            <div class="gauge-label">FMRI</div>
-            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">Blood oxygenation & flow</div>
-            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">
-              <span class="tag tag-success">Tumor</span>
-              <span class="tag tag-warning">Stroke</span>
-              <span class="tag tag-info">Mental</span>
-            </div>
-          </div>
-
-          <div class="panel" style="text-align:center">
-            <div class="gauge" style="--pct:85; margin:0 auto;">
-              <div class="gauge-inner" style="color:var(--green)">85</div>
-            </div>
-            <div class="gauge-label">HRV</div>
-            <div style="font-size:9px;color:var(--text-muted);margin-top:4px;">Heart rate variability</div>
-            <div style="margin-top:8px;"><span class="tag tag-success">NORMAL</span></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:10px;" id="radar-labels">
+            <div><span style="color:var(--green)">Frontend</span> <span style="color:var(--text-muted)">92%</span></div>
+            <div><span style="color:var(--cyan)">IA</span> <span style="color:var(--text-muted)">85%</span></div>
+            <div><span style="color:var(--orange)">Automação</span> <span style="color:var(--text-muted)">78%</span></div>
+            <div><span style="color:var(--purple)">Integrações</span> <span style="color:var(--text-muted)">88%</span></div>
+            <div><span style="color:var(--cyan)">DevOps</span> <span style="color:var(--text-muted)">80%</span></div>
+            <div><span style="color:var(--green)">Dados</span> <span style="color:var(--text-muted)">90%</span></div>
           </div>
         </div>
 
         <div class="panel">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div class="panel-title" style="margin:0">Heart Rate Variability</div>
-            <span class="tag tag-success">NORMAL</span>
-          </div>
-          <div class="hrv-graph">
-            <svg viewBox="0 0 800 100" preserveAspectRatio="none">
-              <path d="M0,50 L40,50 L50,20 L60,80 L70,40 L80,60 L120,50 L160,50 L170,30 L180,70 L190,45 L200,55 L240,50 L280,50 L290,25 L300,75 L310,40 L320,60 L360,50 L400,50 L410,35 L420,65 L430,45 L440,55 L480,50 L520,50 L530,20 L540,80 L550,40 L560,60 L600,50 L640,50 L650,30 L660,70 L670,45 L680,55 L720,50 L760,50 L770,25 L780,75 L790,40 L800,50"
-                    fill="none" stroke="var(--cyan)" stroke-width="2">
-                <animate attributeName="d" dur="4s" repeatCount="indefinite"
-                  values="
-                    M0,50 L40,50 L50,20 L60,80 L70,40 L80,60 L120,50 L160,50 L170,30 L180,70 L190,45 L200,55 L240,50 L280,50 L290,25 L300,75 L310,40 L320,60 L360,50 L400,50 L410,35 L420,65 L430,45 L440,55 L480,50 L520,50 L530,20 L540,80 L550,40 L560,60 L600,50 L640,50 L650,30 L660,70 L670,45 L680,55 L720,50 L760,50 L770,25 L780,75 L790,40 L800,50;
-                    M0,50 L40,50 L50,40 L60,60 L70,35 L80,65 L120,50 L160,50 L170,50 L180,50 L190,50 L200,50 L240,50 L280,50 L290,45 L300,55 L310,40 L320,60 L360,50 L400,50 L410,40 L420,60 L430,45 L440,55 L480,50 L520,50 L530,30 L540,70 L550,35 L560,65 L600,50 L640,50 L650,40 L660,60 L670,45 L680,55 L720,50 L760,50 L770,45 L780,55 L790,40 L800,50;
-                    M0,50 L40,50 L50,20 L60,80 L70,40 L80,60 L120,50 L160,50 L170,30 L180,70 L190,45 L200,55 L240,50 L280,50 L290,25 L300,75 L310,40 L320,60 L360,50 L400,50 L410,35 L420,65 L430,45 L440,55 L480,50 L520,50 L530,20 L540,80 L550,40 L560,60 L600,50 L640,50 L650,30 L660,70 L670,45 L680,55 L720,50 L760,50 L770,25 L780,75 L790,40 L800,50
-                  "/>
-              </path>
-            </svg>
-          </div>
-        </div>
-
-        <div class="sub-grid sub-grid-2">
-          <div class="panel" style="text-align:center">
-            <div style="font-family:'Orbitron',sans-serif;font-size:56px;font-weight:700;color:var(--green);text-shadow:0 0 20px var(--green-dim);">90</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:4px;">CENTER SCORE</div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:2px;">216.4 / 90</div>
-            <div style="display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:8px;">
-              <span class="tag tag-info">ERP</span>
-              <span class="tag tag-info">GSR</span>
-              <span class="tag tag-info">NIR</span>
-            </div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title">Cognitive Metrics</div>
-            <div class="radar">
-              <svg viewBox="0 0 100 100">
-                <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="none" stroke="var(--border)" stroke-width="0.5"/>
-                <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="rgba(34,211,238,0.1)" stroke="var(--cyan)" stroke-width="1"/>
-                <polygon points="50,20 80,40 80,70 50,88 20,70 20,40" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>
-                <polygon points="50,30 70,45 70,65 50,80 30,65 30,45" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>
-                <line x1="50" y1="50" x2="50" y2="10" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-                <line x1="50" y1="50" x2="90" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-                <line x1="50" y1="50" x2="90" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-                <line x1="50" y1="50" x2="50" y2="95" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-                <line x1="50" y1="50" x2="10" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-                <line x1="50" y1="50" x2="10" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-                <circle cx="50" cy="50" r="3" fill="var(--cyan)"/>
-              </svg>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:10px;">
-              <div><span style="color:var(--green)">97/88</span> <span style="color:var(--text-muted)">VITESSE</span></div>
-              <div><span style="color:var(--cyan)">92/90</span> <span style="color:var(--text-muted)">TIRS</span></div>
-              <div><span style="color:var(--orange)">90/57</span> <span style="color:var(--text-muted)">PASSES</span></div>
-              <div><span style="color:var(--text-muted)">60/85</span> <span style="color:var(--text-muted)">DEFENSE</span></div>
-              <div><span style="color:var(--purple)">96/89</span> <span style="color:var(--text-muted)">DRIBBLES</span></div>
-            </div>
-          </div>
+          <div class="panel-title">Competências Principais</div>
+          <div id="competencies">Carregando...</div>
         </div>
       </div>
     </div>
 
     <footer>
-      <span>CEREBRO // HIIF NEURAL ANALYTICS v1.0.0</span>
+      <span>HERMES ECOSYSTEM // RADAR v1.0.0</span>
       <a href="https://github.com/flavio-guedes/Cerebro" target="_blank" style="color:var(--cyan);text-decoration:none;">flavio-guedes/Cerebro</a>
     </footer>
   </div>
 
   <script>
-    // Simula atualização de dados em tempo real
-    function jitter(val, range) {
-      return (val + (Math.random() - 0.5) * range).toFixed(1);
+    // Dados diretos do ecossistema Hermes
+    const ecosystem = {
+      skills: [
+        { name: "Frontend (HTML/CSS/JS)", maturity: "high" },
+        { name: "React / Next.js", maturity: "high" },
+        { name: "Tailwind CSS", maturity: "high" },
+        { name: "Python / FastAPI", maturity: "high" },
+        { name: "IA / LLMs / Embeddings", maturity: "mid" },
+        { name: "Automação / Agents", maturity: "mid" },
+        { name: "GitHub Actions / CI", maturity: "mid" },
+        { name: "APIs / Integrações", maturity: "high" },
+        { name: "Dashboards / Visualização", maturity: "high" },
+        { name: "Design Systems", maturity: "mid" },
+        { name: "Scraping / Browser", maturity: "mid" },
+        { name: "Deploy / GitHub Pages", maturity: "high" }
+      ],
+      frameworks: [
+        { name: "Next.js", status: "ACTIVE" },
+        { name: "FastAPI", status: "ACTIVE" },
+        { name: "Tailwind", status: "ACTIVE" },
+        { name: "GSAP", status: "ACTIVE" },
+        { name: "Framer Motion", status: "ACTIVE" },
+        { name: "Three.js", status: "EXPERIMENTAL" },
+        { name: "Playwright", status: "PLANNED" },
+        { name: "PostgreSQL", status: "ACTIVE" },
+        { name: "Redis", status: "ACTIVE" }
+      ],
+      maturity: [
+        { domain: "Frontend", count: 4, maturity: "92%" },
+        { domain: "IA / ML", count: 3, maturity: "85%" },
+        { domain: "Automação", count: 4, maturity: "78%" },
+        { domain: "Integrações", count: 5, maturity: "88%" },
+        { domain: "DevOps", count: 3, maturity: "80%" },
+        { domain: "Dados", count: 3, maturity: "90%" }
+      ],
+      competencies: [
+        "Arquitetura de interfaces de alto impacto",
+        "Sistemas de IA e automação",
+        "Dashboards e visualização de dados",
+        "Integrações e APIs",
+        "Design Systems e componentização",
+        "Deploy e infraestrutura web"
+      ]
+    };
+
+    function renderSkills() {
+      const container = document.getElementById('skills-list');
+      if (!container) return;
+      container.innerHTML = '';
+      ecosystem.skills.forEach(skill => {
+        const item = document.createElement('div');
+        item.className = 'skill-item';
+        const maturityLabel = skill.maturity === 'high' ? 'ALTA' : skill.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
+        const maturityClass = skill.maturity === 'high' ? 'maturity-high' : skill.maturity === 'mid' ? 'maturity-mid' : 'maturity-low';
+        item.innerHTML = `
+          <span class="skill-name">${skill.name}</span>
+          <span class="skill-maturity ${maturityClass}">${maturityLabel}</span>
+        `;
+        container.appendChild(item);
+      });
     }
-    setInterval(() => {
-      document.getElementById('vital-main').textContent = jitter(120.8, 2);
-      document.getElementById('brain-score').textContent = Math.floor(88 + Math.random() * 4);
-    }, 2000);
+
+    function renderFrameworks() {
+      const container = document.getElementById('framework-grid');
+      if (!container) return;
+      container.innerHTML = '';
+      ecosystem.frameworks.forEach(fw => {
+        const card = document.createElement('div');
+        card.className = 'framework-card';
+        const statusColor = fw.status === 'ACTIVE' ? 'var(--green)' : fw.status === 'EXPERIMENTAL' ? 'var(--orange)' : 'var(--text-muted)';
+        card.innerHTML = `
+          <div class="framework-name">${fw.name}</div>
+          <div class="framework-status" style="color:${statusColor}">${fw.status}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderMaturity() {
+      const tbody = document.getElementById('maturity-table');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      ecosystem.maturity.forEach(m => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="color:var(--cyan)">${m.domain}</td>
+          <td>${m.count}</td>
+          <td><span class="tag tag-success">${m.maturity}</span></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function renderCompetencies() {
+      const container = document.getElementById('competencies');
+      if (!container) return;
+      container.innerHTML = '<div class="skill-list">' + ecosystem.competencies.map(c => `
+        <div class="skill-item">
+          <span class="skill-name">${c}</span>
+        </div>
+      `).join('') + '</div>';
+    }
+
+    function init() {
+      document.getElementById('active-skills').textContent = String(ecosystem.skills.length);
+      document.getElementById('main-skills').textContent = String(ecosystem.competencies.length);
+      document.getElementById('maturity-level').textContent = 'ADVANCED';
+      document.getElementById('metric-frameworks').textContent = String(ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length);
+      renderSkills();
+      renderFrameworks();
+      renderMaturity();
+      renderCompetencies();
+    }
+
+    init();
   </script>
 </body>
 </html>
