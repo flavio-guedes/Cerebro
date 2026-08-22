@@ -482,7 +482,7 @@
     </header>
 
     <nav class="nav">
-      <button class="active" data-tab="radar">Raio-X</button>
+      <button class="active" data-tab="raiox">Raio-X</button>
       <button data-tab="ecosystem">Ecossistema</button>
       <button data-tab="skills">Skills</button>
       <button data-tab="frameworks">Frameworks</button>
@@ -631,7 +631,7 @@
       document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
       document.getElementById('viewport').innerHTML = '';
       updateBrainState(tab);
-      if (tab === 'radar') renderRadar();
+      if (tab === 'raiox') renderRaioX();
       if (tab === 'ecosystem') renderEcosystem();
       if (tab === 'skills') renderSkills();
       if (tab === 'frameworks') renderFrameworks();
@@ -776,39 +776,114 @@
       }
     }
 
-    function renderRadar() {
+    function renderRaioX() {
       document.getElementById('panel-title').textContent = 'Raio-X';
-      const html = `
-        <div class="radar-container">
-          <svg class="radar-svg" viewBox="0 0 100 100">
-            <defs>
-              <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.2"/>
-                <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.05"/>
-              </radialGradient>
-            </defs>
-            <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="none" stroke="var(--border)" stroke-width="0.5"/>
-            <polygon points="50,20 80,40 80,70 50,88 20,70 20,40" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>
-            <polygon points="50,30 70,45 70,65 50,80 30,65 30,45" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>
-            <line x1="50" y1="50" x2="50" y2="10" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-            <line x1="50" y1="50" x2="90" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-            <line x1="50" y1="50" x2="90" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-            <line x1="50" y1="50" x2="50" y2="95" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-            <line x1="50" y1="50" x2="10" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-            <line x1="50" y1="50" x2="10" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-            <circle cx="50" cy="50" r="3" fill="var(--cyan)"/>
-          </svg>
-        </div>
-        <div style="margin-top:10px;">
-          <div class="detail-label">Status</div>
-          <div class="detail-text">Ecossistema ativo com ${ecosystem.projects.filter(p => p.status === 'ACTIVE').length} projetos em produção.</div>
-        </div>
-        <div style="margin-top:10px;">
-          <div class="detail-label">Insights Prioritários</div>
-          <div class="detail-text">${ecosystem.insights.filter(i => i.severity === 'high').length} item(s) de severidade alta.</div>
-        </div>
-      `;
-      document.getElementById('content').innerHTML = html;
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+
+      const skillsSection = document.createElement('div');
+      skillsSection.className = 'detail-section';
+      const skillsByCategory = {};
+      ecosystem.skills.forEach(s => {
+        if (!skillsByCategory[s.category]) skillsByCategory[s.category] = [];
+        skillsByCategory[s.category].push(s);
+      });
+
+      let skillsHtml = '';
+      Object.entries(skillsByCategory).forEach(([cat, items]) => {
+        const itemsHtml = items.map(s => {
+          const maturityLabel = s.maturity === 'high' ? 'ALTA' : s.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
+          const maturityClass = s.maturity === 'high' ? 'chip ok' : s.maturity === 'mid' ? 'chip warn' : 'chip plan';
+          return `<div class="item">
+            <div class="item-header">
+              <span class="item-name">${s.name}</span>
+              <span class="chip ${maturityClass}">${maturityLabel}</span>
+            </div>
+            <div class="item-body">
+              <div class="detail-label">Ferramentas</div>
+              <div class="chips">${(s.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
+            </div>
+          </div>`;
+        }).join('');
+        skillsHtml += `<div style="margin-bottom:12px;">
+          <div class="detail-label" style="color:var(--cyan);font-size:11px;letter-spacing:0.1em;">${cat.toUpperCase()}</div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">${itemsHtml}</div>
+        </div>`;
+      });
+
+      skillsSection.innerHTML = `<div class="detail-label" style="color:var(--green);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">HABILIDADES / SKILLS</div>${skillsHtml}`;
+      container.appendChild(skillsSection);
+
+      const compSection = document.createElement('div');
+      compSection.className = 'detail-section';
+      const compsHtml = ecosystem.competencies.map(c => {
+        return `<div class="item" style="margin-bottom:6px;">
+          <div class="item-header">
+            <span class="item-name">${c.name}</span>
+            <span class="chip" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(167,139,250,0.3);">${c.category}</span>
+          </div>
+          <div class="item-body">
+            <div class="detail-text">${c.detail}</div>
+          </div>
+        </div>`;
+      }).join('');
+      compSection.innerHTML = `<div class="detail-label" style="color:var(--green);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">COMPETÊNCIAS</div><div style="display:flex;flex-direction:column;gap:6px;">${compsHtml}</div>`;
+      container.appendChild(compSection);
+
+      const fwSection = document.createElement('div');
+      fwSection.className = 'detail-section';
+      const fwsHtml = ecosystem.frameworks.map(fw => {
+        const statusClass = fw.status === 'ACTIVE' ? 'chip ok' : fw.status === 'EXPERIMENTAL' ? 'chip warn' : 'chip plan';
+        return `<div class="item" style="margin-bottom:6px;">
+          <div class="item-header">
+            <span class="item-name">${fw.name}</span>
+            <span class="chip ${statusClass}">${fw.status}</span>
+          </div>
+          <div class="item-body">
+            <div class="detail-text">${fw.details}</div>
+          </div>
+        </div>`;
+      }).join('');
+      fwSection.innerHTML = `<div class="detail-label" style="color:var(--orange);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">FRAMEWORKS</div><div style="display:flex;flex-direction:column;gap:6px;">${fwsHtml}</div>`;
+      container.appendChild(fwSection);
+
+      const matSection = document.createElement('div');
+      matSection.className = 'detail-section';
+      const matHtml = ecosystem.maturity.map(m => {
+        return `<div class="status-row" style="margin-bottom:6px;">
+          <span class="status-domain" style="font-size:12px;font-weight:500;color:var(--text)">${m.domain}</span>
+          <div class="status-bar"><div class="status-fill" style="width:${m.maturity}"></div></div>
+          <span class="chip ok">${m.maturity}</span>
+          <span class="chip" style="background:var(--cyan-dim);color:var(--cyan);border-color:rgba(34,211,238,0.3);">${m.count} skills</span>
+        </div>`;
+      }).join('');
+      matSection.innerHTML = `<div class="detail-label" style="color:var(--purple);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">MATURIDADE</div><div style="display:flex;flex-direction:column;gap:6px;">${matHtml}</div>`;
+      container.appendChild(matSection);
+
+      const insSection = document.createElement('div');
+      insSection.className = 'detail-section';
+      const sorted = [...ecosystem.insights].sort((a, b) => {
+        const order = { high: 0, mid: 1, low: 2 };
+        return (order[a.severity] ?? 9) - (order[b.severity] ?? 9);
+      });
+      const insightsHtml = sorted.map(ins => {
+        const typeLabel = ins.type === 'alert' ? 'ALERTA' : ins.type === 'opportunity' ? 'OPORTUNIDADE' : ins.type === 'fragility' ? 'FRAGILIDADE' : 'PRÓXIMO PASSO';
+        const typeClass = ins.type === 'alert' ? 'chip danger' : ins.type === 'opportunity' ? 'chip ok' : ins.type === 'fragility' ? 'chip warn' : 'chip plan';
+        const sev = severityMeta(ins.severity);
+        return `<div class="insight ${ins.type}" style="margin-bottom:8px;">
+          <div class="insight-header">
+            <span class="insight-title">${ins.title}</span>
+            <span class="insight-type ${typeClass}">${typeLabel}</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${ins.desc}</div>
+          <div class="chips" style="margin-top:6px;">
+            <span class="chip ${sev.cssClass}">${sev.label}</span>
+            ${(ins.projects || []).map(p => `<span class="chip">${p}</span>`).join('')}
+          </div>
+        </div>`;
+      }).join('');
+      insSection.innerHTML = `<div class="detail-label" style="color:var(--red);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">INSIGHTS / OPORTUNIDADES / FRAGILIDADES</div><div style="display:flex;flex-direction:column;gap:8px;">${insightsHtml}</div>`;
+      container.appendChild(insSection);
     }
 
     function renderEcosystem() {
@@ -1098,8 +1173,8 @@
         makeItemClickable(panel, () => switchTab(target));
       });
 
-      updateBrainState('radar');
-      renderRadar();
+      updateBrainState('raiox');
+      renderRaioX();
     }
 
     init();
