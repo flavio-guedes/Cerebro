@@ -27,13 +27,13 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { margin: 0; }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     /* Scanlines */
@@ -61,24 +61,25 @@
     .container {
       position: relative;
       z-index: 1;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 12px;
     }
 
-    /* Header */
+    /* Header compact */
     header {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-      align-items: start;
-      margin-bottom: 16px;
+      gap: 12px;
+      flex-shrink: 0;
     }
     .panel {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 14px;
+      padding: 12px;
       position: relative;
       overflow: hidden;
     }
@@ -92,41 +93,42 @@
     }
     .panel-title {
       font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
+      font-size: 9px;
       letter-spacing: 0.25em;
       color: var(--cyan);
       text-transform: uppercase;
-      margin-bottom: 10px;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .panel-title::before {
       content: "";
-      width: 6px; height: 6px;
+      width: 4px; height: 4px;
       border-radius: 50%;
       background: var(--cyan);
-      box-shadow: 0 0 8px var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
     }
 
     /* Navigation */
     .nav {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-shrink: 0;
     }
     .nav button {
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 8px 14px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.08em;
       transition: all 0.2s;
       text-transform: uppercase;
+      flex: 1;
     }
     .nav button:hover {
       border-color: var(--cyan);
@@ -139,67 +141,25 @@
       color: var(--cyan);
     }
 
-    /* Panoramic grid */
-    .panoramic {
+    /* Main area */
+    .main {
+      flex: 1;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 16px;
+      min-height: 0;
     }
-    .mini-panel {
+    .main-panel {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
+      padding: 14px;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
-    .mini-panel:hover {
-      border-color: var(--cyan);
-      box-shadow: 0 0 15px var(--cyan-dim);
-      transform: translateY(-2px);
-    }
-    .mini-panel::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-    }
-    .mini-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .mini-value {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text);
-    }
-    .mini-sub {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Brain radar */
-    .brain-radar {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 16px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .brain-radar::before {
+    .main-panel::before {
       content: "";
       position: absolute;
       top: 0; left: 0; right: 0;
@@ -207,35 +167,44 @@
       background: linear-gradient(90deg, transparent, var(--cyan), transparent);
       opacity: 0.4;
     }
+
+    /* Brain */
+    .brain-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 0;
+    }
     .brain-svg {
       width: 100%;
-      max-width: 320px;
-      margin: 0 auto;
-      display: block;
+      max-width: 380px;
+      height: auto;
       filter: drop-shadow(0 0 12px var(--cyan-dim));
+      transition: all 0.3s ease;
+    }
+    .brain-svg:hover {
+      filter: drop-shadow(0 0 25px var(--cyan-dim));
     }
 
-    /* Tabs content */
-    .tab-section {
-      display: none;
+    /* Skills list */
+    .skill-list {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
     }
-    .tab-section.active {
-      display: block;
-    }
-
-    /* Skills */
     .skill-item {
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 6px;
+      padding: 8px;
       cursor: pointer;
       transition: all 0.2s;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .skill-item:hover {
       border-color: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan-dim);
+      box-shadow: 0 0 8px var(--cyan-dim);
     }
     .skill-header {
       display: flex;
@@ -244,49 +213,45 @@
     }
     .skill-name {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .skill-name::before {
       content: "";
-      width: 4px; height: 4px;
+      width: 3px; height: 3px;
       border-radius: 50%;
       background: var(--cyan);
-      box-shadow: 0 0 6px var(--cyan);
+      box-shadow: 0 0 4px var(--cyan);
     }
     .skill-expand {
       color: var(--cyan);
-      font-size: 12px;
+      font-size: 11px;
       transition: transform 0.2s;
     }
     .skill-body {
       display: none;
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 6px;
+      padding-top: 6px;
       border-top: 1px solid var(--border);
     }
-    .skill-item.expanded .skill-body {
-      display: block;
-    }
-    .skill-item.expanded .skill-expand {
-      transform: rotate(45deg);
-    }
+    .skill-item.expanded .skill-body { display: block; }
+    .skill-item.expanded .skill-expand { transform: rotate(45deg); }
     .tool-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
+      gap: 4px;
+      margin-top: 4px;
     }
     .tag {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 10px;
+      gap: 3px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 9px;
       font-family: 'JetBrains Mono', monospace;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -297,18 +262,23 @@
     .tag-info { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(34,211,238,0.3); }
 
     /* Frameworks */
+    .framework-list {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
     .framework-item {
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
+      border-radius: 6px;
+      padding: 8px;
       cursor: pointer;
       transition: all 0.2s;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .framework-item:hover {
       border-color: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan-dim);
+      box-shadow: 0 0 8px var(--cyan-dim);
     }
     .framework-header {
       display: flex;
@@ -317,31 +287,32 @@
     }
     .framework-name {
       font-family: 'Orbitron', sans-serif;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--cyan);
     }
     .framework-expand {
       color: var(--cyan);
-      font-size: 12px;
+      font-size: 11px;
       transition: transform 0.2s;
     }
     .framework-body {
       display: none;
-      margin-top: 10px;
-      padding-top: 10px;
+      margin-top: 6px;
+      padding-top: 6px;
       border-top: 1px solid var(--border);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
     }
-    .framework-item.expanded .framework-body {
-      display: block;
-    }
-    .framework-item.expanded .framework-expand {
-      transform: rotate(45deg);
-    }
+    .framework-item.expanded .framework-body { display: block; }
+    .framework-item.expanded .framework-expand { transform: rotate(45deg); }
 
     /* Maturity */
+    .maturity-list {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
     .maturity-row {
       display: flex;
       justify-content: space-between;
@@ -354,64 +325,78 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .maturity-row:hover {
-      border-color: var(--cyan);
-    }
+    .maturity-row:hover { border-color: var(--cyan); }
     .maturity-domain {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--cyan);
     }
     .maturity-bar {
-      width: 120px;
-      height: 6px;
-      border-radius: 3px;
+      width: 100px;
+      height: 5px;
+      border-radius: 2px;
       background: var(--surface);
       overflow: hidden;
     }
     .maturity-fill {
       height: 100%;
-      border-radius: 3px;
+      border-radius: 2px;
       background: linear-gradient(90deg, var(--cyan), var(--green));
     }
 
     /* Competencies */
+    .comp-list {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
     .comp-item {
       background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 8px;
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 6px;
       cursor: pointer;
       transition: all 0.2s;
     }
-    .comp-item:hover {
-      border-color: var(--cyan);
-    }
+    .comp-item:hover { border-color: var(--cyan); }
     .comp-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text);
     }
     .comp-body {
       display: none;
-      margin-top: 8px;
-      padding-top: 8px;
+      margin-top: 6px;
+      padding-top: 6px;
       border-top: 1px solid var(--border);
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
     }
-    .comp-item.expanded .comp-body {
-      display: block;
+    .comp-item.expanded .comp-body { display: block; }
+
+    /* Radar */
+    .radar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    .radar-svg {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      filter: drop-shadow(0 0 12px var(--cyan-dim));
     }
 
     /* Metrics */
     .metric-number {
       font-family: 'Orbitron', sans-serif;
-      font-size: 42px;
+      font-size: 32px;
       font-weight: 700;
       color: var(--cyan);
       text-shadow: 0 0 20px var(--cyan-dim);
@@ -419,22 +404,19 @@
     }
 
     footer {
-      margin-top: 24px;
-      padding-top: 12px;
+      flex-shrink: 0;
+      padding-top: 8px;
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
+      font-size: 9px;
       color: var(--text-muted);
     }
 
     @media (max-width: 980px) {
       header { grid-template-columns: 1fr; }
-      .panoramic { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 640px) {
-      .panoramic { grid-template-columns: 1fr; }
+      .main { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -444,37 +426,35 @@
     <header>
       <div class="panel">
         <div class="panel-title">Hermes Ecosystem</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.6;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);line-height:1.5;">
           Skills ativas: <span style="color:var(--cyan)" id="active-skills">--</span><br>
-          Habilidades principais: <span style="color:var(--cyan)" id="main-skills">--</span><br>
+          Competências: <span style="color:var(--cyan)" id="main-skills">--</span><br>
           Maturidade: <span style="color:var(--green)" id="maturity-level">--</span>
         </div>
       </div>
-
       <div class="panel" style="text-align:center">
         <div class="metric-number" id="metric-frameworks">--</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:4px;">FRAMEWORKS ATIVOS</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-top:2px;">FRAMEWORKS ATIVOS</div>
       </div>
-
       <div class="panel">
         <div class="panel-title">System Status</div>
-        <div style="display:grid; gap:10px; margin-top:6px;">
+        <div style="display:grid; gap:6px; margin-top:4px;">
           <div>
-            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;margin-bottom:3px;">
               <span style="color:var(--text-muted)">FRONTEND</span>
               <span class="tag tag-success">STABLE</span>
             </div>
             <div class="maturity-bar"><div class="maturity-fill" style="width:92%"></div></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;margin-bottom:3px;">
               <span style="color:var(--text-muted)">AUTOMAÇÃO</span>
               <span class="tag tag-warning">EXPANDING</span>
             </div>
             <div class="maturity-bar"><div class="maturity-fill" style="width:78%"></div></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:4px;">
+            <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;margin-bottom:3px;">
               <span style="color:var(--text-muted)">INTEGRAÇÕES</span>
               <span class="tag tag-success">CONNECTED</span>
             </div>
@@ -484,42 +464,25 @@
       </div>
     </header>
 
-    <!-- Panoramic overview -->
-    <div class="panoramic">
-      <div class="mini-panel" data-goto="tab-radar">
-        <div class="mini-title">Raio-X</div>
-        <div class="mini-value" id="mini-radar">--</div>
-        <div class="mini-sub">Domínios mapeados</div>
-      </div>
-      <div class="mini-panel" data-goto="tab-skills">
-        <div class="mini-title">Skills</div>
-        <div class="mini-value" id="mini-skills">--</div>
-        <div class="mini-sub">Competências ativas</div>
-      </div>
-      <div class="mini-panel" data-goto="tab-frameworks">
-        <div class="mini-title">Frameworks</div>
-        <div class="mini-value" id="mini-frameworks">--</div>
-        <div class="mini-sub">Implementados</div>
-      </div>
-      <div class="mini-panel" data-goto="tab-maturity">
-        <div class="mini-title">Maturidade</div>
-        <div class="mini-value" id="mini-maturity">--</div>
-        <div class="mini-sub">Nível geral</div>
-      </div>
-    </div>
+    <nav class="nav">
+      <button class="active" data-tab="radar">Raio-X</button>
+      <button data-tab="skills">Skills</button>
+      <button data-tab="frameworks">Frameworks</button>
+      <button data-tab="maturity">Maturidade</button>
+      <button data-tab="competencies">Competências</button>
+    </nav>
 
-    <!-- Brain Radar -->
-    <div class="brain-radar">
-      <div class="panel-title">Raio-X do Ecossistema</div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; align-items:center;">
-        <div>
-          <svg class="brain-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <div class="main">
+      <div class="main-panel" id="main-left">
+        <div class="panel-title">Painel Principal</div>
+        <div class="brain-container">
+          <svg class="brain-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" id="brain-svg">
             <!-- Brain outline -->
             <path d="M100,30 C70,30 50,50 50,80 C50,110 65,125 80,130 L80,150 C80,155 85,160 100,160 C115,160 120,155 120,150 L120,130 C135,125 150,110 150,80 C150,50 130,30 100,30 Z"
                   fill="none" stroke="var(--cyan)" stroke-width="2"/>
             <!-- Brain hemispheres -->
             <path d="M100,40 C85,40 75,55 75,80 C75,105 85,120 100,125 C115,120 125,105 125,80 C125,55 115,40 100,40 Z"
-                  fill="rgba(34,211,238,0.1)" stroke="var(--cyan)" stroke-width="1.5"/>
+                  fill="rgba(34,211,238,0.08)" stroke="var(--cyan)" stroke-width="1.5"/>
             <line x1="100" y1="40" x2="100" y2="160" stroke="var(--cyan)" stroke-width="1.5"/>
             <!-- Neural connections -->
             <path d="M80,60 L120,60 M80,80 L120,80 M80,100 L120,100 M80,120 L120,120" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
@@ -546,98 +509,20 @@
               <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite" begin="1.5s"/>
               <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite" begin="1.5s"/>
             </circle>
+            <!-- Interactive hotspots -->
+            <circle cx="80" cy="60" r="6" fill="transparent" class="brain-hotspot" data-area="frontend"/>
+            <circle cx="120" cy="80" r="6" fill="transparent" class="brain-hotspot" data-area="ia"/>
+            <circle cx="80" cy="100" r="6" fill="transparent" class="brain-hotspot" data-area="automacao"/>
+            <circle cx="120" cy="120" r="6" fill="transparent" class="brain-hotspot" data-area="integracoes"/>
           </svg>
         </div>
-        <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);margin-bottom:8px;">DOMÍNIOS</div>
-          <div id="radar-labels">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--green)"></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">Frontend</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:auto;">92%</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">IA / ML</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:auto;">85%</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--orange)"></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">Automação</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:auto;">78%</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--purple)"></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">Integrações</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:auto;">88%</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--cyan)"></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">DevOps</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:auto;">80%</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:var(--green)"></span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">Dados</span>
-              <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);margin-left:auto;">90%</span>
-            </div>
-          </div>
-        </div>
+      </div>
+
+      <div class="main-panel" id="main-right">
+        <div class="panel-title" id="panel-title">Raio-X</div>
+        <div id="main-content" class="skill-list"></div>
       </div>
     </div>
-
-    <!-- Navigation tabs -->
-    <nav class="nav" style="margin-bottom:16px">
-      <button class="active" data-tab="radar">Raio-X</button>
-      <button data-tab="skills">Skills</button>
-      <button data-tab="frameworks">Frameworks</button>
-      <button data-tab="maturity">Maturidade</button>
-      <button data-tab="competencies">Competências</button>
-    </nav>
-
-    <!-- Radar tab -->
-    <section class="tab-section active" id="tab-radar">
-      <div class="panel">
-        <div class="panel-title">Visão Geral</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);line-height:1.6;">
-          Total de domínios: <span style="color:var(--cyan)">6</span><br>
-          Cobertura média: <span style="color:var(--green)">87%</span><br>
-          Áreas em expansão: <span style="color:var(--orange)">Automação, IA</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Skills tab -->
-    <section class="tab-section" id="tab-skills">
-      <div class="panel">
-        <div class="panel-title">Skills & Competências</div>
-        <div id="skills-list"></div>
-      </div>
-    </section>
-
-    <!-- Frameworks tab -->
-    <section class="tab-section" id="tab-frameworks">
-      <div class="panel">
-        <div class="panel-title">Frameworks Implementados</div>
-        <div id="framework-list"></div>
-      </div>
-    </section>
-
-    <!-- Maturity tab -->
-    <section class="tab-section" id="tab-maturity">
-      <div class="panel">
-        <div class="panel-title">Maturidade por Domínio</div>
-        <div id="maturity-list"></div>
-      </div>
-    </section>
-
-    <!-- Competencies tab -->
-    <section class="tab-section" id="tab-competencies">
-      <div class="panel">
-        <div class="panel-title">Competências Principais</div>
-        <div id="competencies-list"></div>
-      </div>
-    </section>
 
     <footer>
       <span>HERMES ECOSYSTEM // RADAR v1.0.0</span>
@@ -646,7 +531,6 @@
   </div>
 
   <script>
-    // Dados diretos do ecossistema Hermes
     const ecosystem = {
       skills: [
         { name: "Frontend (HTML/CSS/JS)", maturity: "high", tools: ["Vite", "Webpack", "Storybook", "Chromatic"] },
@@ -691,10 +575,13 @@
       ]
     };
 
+    let currentTab = 'radar';
+
     function renderSkills() {
-      const container = document.getElementById('skills-list');
+      const container = document.getElementById('main-content');
       if (!container) return;
       container.innerHTML = '';
+      container.className = 'skill-list';
       ecosystem.skills.forEach(skill => {
         const item = document.createElement('div');
         item.className = 'skill-item';
@@ -707,7 +594,7 @@
             <span class="skill-expand">+</span>
           </div>
           <div class="skill-body">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">Ferramentas</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:4px;">Ferramentas</div>
             <div class="tool-list">
               ${(skill.tools || []).map(t => `<span class="tag tag-info">${t}</span>`).join('')}
             </div>
@@ -719,9 +606,10 @@
     }
 
     function renderFrameworks() {
-      const container = document.getElementById('framework-list');
+      const container = document.getElementById('main-content');
       if (!container) return;
       container.innerHTML = '';
+      container.className = 'framework-list';
       ecosystem.frameworks.forEach(fw => {
         const item = document.createElement('div');
         item.className = 'framework-item';
@@ -742,9 +630,10 @@
     }
 
     function renderMaturity() {
-      const container = document.getElementById('maturity-list');
+      const container = document.getElementById('main-content');
       if (!container) return;
       container.innerHTML = '';
+      container.className = 'maturity-list';
       ecosystem.maturity.forEach(m => {
         const row = document.createElement('div');
         row.className = 'maturity-row';
@@ -758,9 +647,10 @@
     }
 
     function renderCompetencies() {
-      const container = document.getElementById('competencies-list');
+      const container = document.getElementById('main-content');
       if (!container) return;
       container.innerHTML = '';
+      container.className = 'comp-list';
       ecosystem.competencies.forEach(c => {
         const item = document.createElement('div');
         item.className = 'comp-item';
@@ -779,51 +669,84 @@
       });
     }
 
+    function renderRadar() {
+      const container = document.getElementById('main-content');
+      if (!container) return;
+      container.className = 'radar-container';
+      container.innerHTML = `
+        <svg class="radar-svg" viewBox="0 0 100 100">
+          <defs>
+            <radialGradient id="radarFill" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="var(--cyan)" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0.05"/>
+            </radialGradient>
+          </defs>
+          <polygon points="50,10 90,35 90,75 50,95 10,75 10,35" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+          <polygon points="50,20 80,40 80,70 50,88 20,70 20,40" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.5"/>
+          <polygon points="50,30 70,45 70,65 50,80 30,65 30,45" fill="none" stroke="var(--border)" stroke-width="0.5" opacity="0.3"/>
+          <line x1="50" y1="50" x2="50" y2="10" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+          <line x1="50" y1="50" x2="90" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+          <line x1="50" y1="50" x2="90" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+          <line x1="50" y1="50" x2="50" y2="95" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+          <line x1="50" y1="50" x2="10" y2="75" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+          <line x1="50" y1="50" x2="10" y2="35" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
+          <circle cx="50" cy="50" r="3" fill="var(--cyan)"/>
+        </svg>
+      `;
+    }
+
+    function updateMainPanel(tab) {
+      currentTab = tab;
+      const titles = {
+        radar: 'Raio-X',
+        skills: 'Skills & Competências',
+        frameworks: 'Frameworks Implementados',
+        maturity: 'Maturidade por Domínio',
+        competencies: 'Competências Principais'
+      };
+      document.getElementById('panel-title').textContent = titles[tab] || 'Raio-X';
+      switch(tab) {
+        case 'radar': renderRadar(); break;
+        case 'skills': renderSkills(); break;
+        case 'frameworks': renderFrameworks(); break;
+        case 'maturity': renderMaturity(); break;
+        case 'competencies': renderCompetencies(); break;
+      }
+    }
+
     function init() {
       document.getElementById('active-skills').textContent = String(ecosystem.skills.length);
       document.getElementById('main-skills').textContent = String(ecosystem.competencies.length);
       document.getElementById('maturity-level').textContent = 'ADVANCED';
       document.getElementById('metric-frameworks').textContent = String(ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length);
 
-      document.getElementById('mini-radar').textContent = String(ecosystem.maturity.length);
-      document.getElementById('mini-skills').textContent = String(ecosystem.skills.length);
-      document.getElementById('mini-frameworks').textContent = String(ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length);
-      document.getElementById('mini-maturity').textContent = '87%';
-
-      renderSkills();
-      renderFrameworks();
-      renderMaturity();
-      renderCompetencies();
-      initTabs();
-      initMiniPanels();
-    }
-
-    function initTabs() {
       document.querySelectorAll('.nav button').forEach(btn => {
         btn.addEventListener('click', () => {
           document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-          document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
           btn.classList.add('active');
-          const tab = document.getElementById('tab-' + btn.dataset.tab);
-          if (tab) tab.classList.add('active');
+          updateMainPanel(btn.dataset.tab);
         });
       });
-    }
 
-    function initMiniPanels() {
-      document.querySelectorAll('.mini-panel').forEach(panel => {
-        panel.addEventListener('click', () => {
-          const target = panel.dataset.goto;
-          if (!target) return;
+      document.querySelectorAll('.brain-hotspot').forEach(spot => {
+        spot.style.cursor = 'pointer';
+        spot.addEventListener('click', () => {
+          const area = spot.dataset.area;
+          const mapping = {
+            frontend: 'skills',
+            ia: 'skills',
+            automacao: 'skills',
+            integracoes: 'skills'
+          };
+          const tab = mapping[area] || 'radar';
           document.querySelectorAll('.nav button').forEach(b => {
-            b.classList.toggle('active', b.dataset.tab === target.replace('tab-', ''));
+            b.classList.toggle('active', b.dataset.tab === tab);
           });
-          document.querySelectorAll('.tab-section').forEach(t => t.classList.remove('active'));
-          const tab = document.getElementById(target);
-          if (tab) tab.classList.add('active');
-          window.scrollTo({ top: tab.offsetTop - 80, behavior: 'smooth' });
+          updateMainPanel(tab);
         });
       });
+
+      updateMainPanel('radar');
     }
 
     init();
