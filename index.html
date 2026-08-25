@@ -1,1183 +1,661 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cerebro — Hermes Ecosystem Radar</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #020b16;
-      --surface: #0a1628;
-      --surface-2: #0f2140;
-      --border: #1a3a5c;
-      --text: #e6f3ff;
-      --text-muted: #5a7a9a;
-      --cyan: #22d3ee;
-      --cyan-dim: rgba(34,211,238,0.25);
-      --green: #34d399;
-      --green-dim: rgba(52,211,153,0.15);
-      --orange: #fbbf24;
-      --orange-dim: rgba(251,191,36,0.15);
-      --red: #f87171;
-      --red-dim: rgba(248,113,113,0.18);
-      --purple: #a78bfa;
-      --purple-dim: rgba(167,139,250,0.15);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { margin: 0; height: 100%; overflow: hidden; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      overflow: hidden;
-    }
-
-    /* Scanlines */
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 3px);
-      z-index: 50;
-    }
-
-    /* Grid background */
-    .grid-bg {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(rgba(34,211,238,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px);
-      background-size: 40px 40px;
-      z-index: 0;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-      gap: 12px;
-    }
-
-    /* Header */
-    header {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      position: relative;
-      overflow: hidden;
-    }
-    .panel::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-      opacity: 0.4;
-    }
-    .panel-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.25em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .panel-title::before {
-      content: "";
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 6px var(--cyan);
-    }
-
-    /* KPI header */
-    .kpi-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.25em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .kpi-title::before {
-      content: "";
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 6px var(--cyan);
-    }
-    .metric {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--cyan);
-      text-shadow: 0 0 20px var(--cyan-dim);
-      line-height: 1;
-    }
-    .metric-sub {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Navigation */
-    .nav {
-      display: flex;
-      gap: 6px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-    .nav button {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 7px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 0.08em;
-      transition: all 0.2s;
-      text-transform: uppercase;
-      flex: 1;
-      min-width: 90px;
-    }
-    .nav button:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan-dim);
-    }
-    .nav button.active {
-      background: var(--cyan-dim);
-      border-color: var(--cyan);
-      color: var(--cyan);
-    }
-
-    /* Main area */
-    .main {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      min-height: 0;
-    }
-    .main-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-    }
-    .main-panel::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-      opacity: 0.4;
-    }
-    .panel-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .panel-title::before {
-      content: "";
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 8px var(--cyan);
-    }
-
-    /* Brain */
-    .brain-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      min-height: 0;
-    }
-    .brain-svg {
-      width: 100%;
-      max-width: 420px;
-      height: auto;
-      filter: drop-shadow(0 0 18px var(--cyan-dim));
-      transition: all 0.4s ease;
-    }
-    .brain-svg:hover {
-      filter: drop-shadow(0 0 32px var(--cyan-dim));
-    }
-
-    /* Content */
-    .content-area {
-      overflow-y: auto;
-      flex: 1;
-      min-height: 0;
-      padding-right: 4px;
-    }
-    .content-area::-webkit-scrollbar { width: 6px; }
-    .content-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-    /* Filters */
-    .filters {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-    .filter-btn {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      transition: all 0.15s;
-    }
-    .filter-btn:hover, .filter-btn.active {
-      border-color: var(--cyan);
-      color: var(--cyan);
-      background: var(--cyan-dim);
-    }
-
-    /* Items */
-    .item {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: 8px;
-    }
-    .item:hover {
-      border-color: var(--cyan);
-      box-shadow: 0 0 12px var(--cyan-dim);
-    }
-    .item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .item-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .item-name::before {
-      content: "";
-      width: 3px; height: 3px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 4px var(--cyan);
-    }
-    .item-expand {
-      color: var(--cyan);
-      font-size: 12px;
-      transition: transform 0.2s;
-    }
-    .item-body {
-      display: none;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-    }
-    .item.expanded .item-body { display: block; }
-    .item.expanded .item-expand { transform: rotate(45deg); }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-    .chip {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      border: 1px solid var(--border);
-      background: rgba(34,211,238,0.08);
-      color: var(--text);
-    }
-    .chip.ok { background: var(--green-dim); color: var(--green); border-color: rgba(52,211,153,0.3); }
-    .chip.warn { background: var(--orange-dim); color: var(--orange); border-color: rgba(251,191,36,0.3); }
-    .chip.danger { background: var(--red-dim); color: var(--red); border-color: rgba(248,113,113,0.3); }
-    .chip.plan { background: var(--purple-dim); color: var(--purple); border-color: rgba(167,139,250,0.3); }
-
-    /* Insights / Alerts */
-    .insight {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 8px;
-      border-left: 3px solid var(--cyan);
-      transition: all 0.2s;
-    }
-    .insight.alert { border-left-color: var(--red); }
-    .insight.opportunity { border-left-color: var(--green); }
-    .insight.fragility { border-left-color: var(--orange); }
-    .insight.next { border-left-color: var(--purple); }
-    .insight-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .insight-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .insight-type {
-      font-size: 9px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    /* Radar */
-    .radar-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-    }
-    .radar-svg {
-      width: 100%;
-      max-width: 280px;
-      height: auto;
-      filter: drop-shadow(0 0 12px var(--cyan-dim));
-    }
-
-    footer {
-      flex-shrink: 0;
-      padding-top: 8px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-
-    /* Restored P0 component styles */
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 10px;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      margin-bottom: 6px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .status-row:hover { border-color: var(--cyan); }
-    .status-domain {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text);
-    }
-    .status-bar {
-      width: 100px;
-      height: 5px;
-      border-radius: 3px;
-      background: var(--surface);
-      overflow: hidden;
-    }
-    .status-fill {
-      height: 100%;
-      border-radius: 3px;
-      background: linear-gradient(90deg, var(--cyan), var(--green));
-    }
-    .detail-section { margin-bottom: 12px; }
-    .detail-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .detail-text {
-      font-size: 12px;
-      color: var(--text);
-      line-height: 1.5;
-    }
-
-    @media (max-width: 980px) {
-      header { grid-template-columns: repeat(2, 1fr); }
-      .main { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 640px) {
-      header { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EPQ · Coleta Pedagógica</title>
+<style>
+  :root{
+    --bg:#0b0f14;--panel:#11161d;--panel-2:#1a2028;--border:#2a323c;
+    --text:#e6ecf2;--muted:#9aa3ad;--accent:#f5c842;--accent-2:#f59e0b;
+    --danger:#ef4444;--success:#22c55e;--warn:#f59e0b;
+    --font-ui: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
+    --font-display: Georgia,ui-serif,serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--font-ui)}
+  a{color:var(--accent)}
+  .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+  .sidebar{background:var(--panel);border-right:1px solid var(--border);padding:18px 14px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{font-family:var(--font-display);font-size:18px;color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .brand small{display:block;color:var(--muted);font-family:var(--font-ui);font-size:11px;margin-top:2px}
+  .nav{display:flex;flex-direction:column;gap:4px}
+  .nav button{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 10px;border-radius:8px;text-align:left;cursor:pointer;font-size:13px}
+  .nav button:hover{background:#ffffff08;color:#fff}
+  .nav button.active{background:#ffffff0d;border-color:#ffffff18;color:#fff;font-weight:600}
+  .main{overflow:auto;height:100vh;position:sticky;top:0}
+  .wrap{max-width:960px;margin:0 auto;padding:22px 22px 80px}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;position:sticky;top:0;background:linear-gradient(to bottom,var(--bg) 70%,transparent);padding:10px 0;z-index:5}
+  .top h1{font-family:var(--font-display);font-size:22px;margin:0}
+  .top .meta{color:var(--muted);font-size:12px}
+  .progress{height:6px;background:#ffffff14;border-radius:999px;overflow:hidden;margin:6px 0 14px}
+  .progress > b{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .2s}
+  .section{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+  .section h2{font-size:14px;color:var(--accent);margin:0 0 12px;font-family:var(--font-display);letter-spacing:.3px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  .field input,.field select,.field textarea{width:100%;background:#0b0f14;border:1px solid var(--border);color:#fff;padding:10px 12px;border-radius:8px;font-size:14px;outline:none}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+  .field textarea{min-height:90px;resize:vertical}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media (max-width:860px){
+    .app{grid-template-columns:1fr}
+    .sidebar{display:none}
+    .mobile-bar{display:flex !important}
+  }
+  .mobile-bar{display:none;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 14px;align-items:center;justify-content:space-between;z-index:20}
+  .mobile-bar button{background:var(--panel);border:1px solid var(--border);color:#fff;padding:8px 10px;border-radius:8px}
+  .mobile-menu{position:fixed;inset:0;background:#000000aa;z-index:50;display:none}
+  .mobile-menu.open{display:block}
+  .mobile-menu .sheet{position:absolute;left:0;top:0;bottom:0;width:min(320px,85vw);background:var(--panel);border-right:1px solid var(--border);padding:18px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:#ffffff0d;border:1px solid var(--border);padding:6px 10px;border-radius:999px;font-size:12px;cursor:pointer;user-select:none}
+  .chip input{display:none}
+  .chip.sel{background:#f5c8421a;border-color:#f5c84266;color:#fff}
+  .chip.confirmed{background:#22c55e1a;border-color:#22c55e66;color:#fff}
+  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+  .btn{background:var(--accent);color:#0b0f14;border:none;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#ffffff14;color:#fff;border:1px solid var(--border)}
+  .toast{position:fixed;right:18px;bottom:18px;background:var(--panel);border:1px solid var(--border);padding:12px 14px;border-radius:10px;color:#fff;box-shadow:0 10px 30px #00000066;display:none;z-index:100}
+  .hidden{display:none}
+  .insight{background:#1a2028;border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 8px 8px 0;color:var(--muted);font-size:12px;margin:8px 0 12px}
+  .insight strong{color:var(--text)}
+  .auto-fill{padding:8px 10px;background:#22c55e0d;border:1px dashed #22c55e66;border-radius:8px;color:var(--muted);font-size:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .auto-fill strong{color:var(--text)}
+  .confirm-btn{background:var(--success);color:#000;border:none;padding:6px 10px;border-radius:6px;font-weight:700;cursor:pointer;font-size:11px}
+  .suggest-field{margin-top:8px;padding:8px;background:#ffffff08;border-radius:8px;border:1px dashed var(--border)}
+  .suggest-field label{color:var(--muted);font-size:11px}
+</style>
 </head>
 <body>
-  <div class="grid-bg"></div>
-  <div class="container">
-    <header>
-      <div class="panel">
-        <div class="kpi-title">Ecossistema</div>
-        <div class="metric" id="metric-ecosystem">--</div>
-        <div class="metric-sub">Módulos mapeados</div>
-      </div>
-      <div class="panel">
-        <div class="kpi-title">Skills</div>
-        <div class="metric" id="metric-skills">--</div>
-        <div class="metric-sub">Competências ativas</div>
-      </div>
-      <div class="panel">
-        <div class="kpi-title">Frameworks</div>
-        <div class="metric" id="metric-frameworks">--</div>
-        <div class="metric-sub">Implementados</div>
-      </div>
-      <div class="panel">
-        <div class="kpi-title">Alertas</div>
-        <div class="metric" id="metric-alerts" style="color:var(--orange)">--</div>
-        <div class="metric-sub">Insights ativos</div>
-      </div>
-    </header>
-
-    <nav class="nav">
-      <button class="active" data-tab="raiox">Raio-X</button>
-      <button data-tab="ecosystem">Ecossistema</button>
-      <button data-tab="skills">Skills</button>
-      <button data-tab="frameworks">Frameworks</button>
-      <button data-tab="maturity">Maturidade</button>
-      <button data-tab="insights">Insights</button>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">EPQ <small>Coleta Pedagógica</small></div>
+    <nav class="nav" id="nav">
+      <button data-target="s-intro" class="active">1. Identificação</button>
+      <button data-target="s-metodologia">2. Metodologia</button>
+      <button data-target="s-pmerj">3. PMERJ</button>
+      <button data-target="s-ses">4. ESA / Militares</button>
+      <button data-target="s-professores">5. Professores</button>
+      <button data-target="s-aluno">6. Acompanhamento</button>
+      <button data-target="s-comercial">7. Comercial</button>
+      <button data-target="s-resultados">8. Resultados</button>
+      <button data-target="s-protocolos">9. Protocolos</button>
+      <button data-target="s-infra">10. Infraestrutura</button>
+      <button data-target="s-final">11. Finalização</button>
     </nav>
-
-    <div class="main">
-      <div class="main-panel">
-        <div class="panel-title">Cérebro — Ecossistema Hermes</div>
-        <div class="brain-container">
-          <svg class="brain-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" id="brain-svg">
-            <!-- Brain outline -->
-            <path d="M100,30 C70,30 50,50 50,80 C50,110 65,125 80,130 L80,150 C80,155 85,160 100,160 C115,160 120,155 120,150 L120,130 C135,125 150,110 150,80 C150,50 130,30 100,30 Z"
-                  fill="none" stroke="var(--cyan)" stroke-width="2" id="brain-outline"/>
-            <!-- Brain hemispheres -->
-            <path d="M100,40 C85,40 75,55 75,80 C75,105 85,120 100,125 C115,120 125,105 125,80 C125,55 115,40 100,40 Z"
-                  fill="rgba(34,211,238,0.08)" stroke="var(--cyan)" stroke-width="1.5" id="brain-fill"/>
-            <line x1="100" y1="40" x2="100" y2="160" stroke="var(--cyan)" stroke-width="1.5" id="brain-divider"/>
-            <!-- Neural connections -->
-            <g id="brain-connections">
-              <path d="M80,60 L120,60 M80,80 L120,80 M80,100 L120,100 M80,120 L120,120" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5"/>
-              <circle cx="80" cy="60" r="2" fill="var(--cyan)"/>
-              <circle cx="120" cy="60" r="2" fill="var(--cyan)"/>
-              <circle cx="80" cy="80" r="2" fill="var(--cyan)"/>
-              <circle cx="120" cy="80" r="2" fill="var(--cyan)"/>
-              <circle cx="80" cy="100" r="2" fill="var(--cyan)"/>
-              <circle cx="120" cy="100" r="2" fill="var(--cyan)"/>
-              <circle cx="80" cy="120" r="2" fill="var(--cyan)"/>
-              <circle cx="120" cy="120" r="2" fill="var(--cyan)"/>
-            </g>
-            <!-- Center core -->
-            <circle cx="100" cy="100" r="8" fill="var(--cyan)" opacity="0.8" id="brain-core">
-              <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="100" cy="100" r="4" fill="var(--bg)"/>
-            <!-- Pulse rings -->
-            <circle cx="100" cy="100" r="20" fill="none" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5">
-              <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite"/>
-              <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="100" cy="100" r="20" fill="none" stroke="var(--cyan)" stroke-width="0.5" opacity="0.5">
-              <animate attributeName="r" values="20;35;20" dur="3s" repeatCount="indefinite" begin="1.5s"/>
-              <animate attributeName="opacity" values="0.5;0;0.5" dur="3s" repeatCount="indefinite" begin="1.5s"/>
-            </circle>
-            <!-- Dynamic hotspots -->
-            <g id="brain-hotspots"></g>
-          </svg>
-        </div>
-      </div>
-
-      <div class="main-panel">
-        <div class="panel-title" id="panel-title">Raio-X</div>
-        <div class="content-area" id="content"></div>
-      </div>
-
-      <div class="main-panel" id="detail-panel">
-        <div class="panel-title">Detalhes</div>
-        <div id="detail" class="content-area">
-          <div class="detail-empty">Selecione um item para ver detalhes.</div>
-        </div>
-      </div>
+    <div style="margin-top:14px;color:var(--muted);font-size:11px">
+      Formulário otimizado para preenchimento rápido. Os campos já sugeridos podem ser confirmados em 1 clique.
     </div>
+  </aside>
 
-    <footer>
-      <span>HERMES ECOSYSTEM RADAR v1.0.0</span>
-      <a href="https://github.com/flavio-guedes/Cerebro" target="_blank" style="color:var(--cyan);text-decoration:none;">flavio-guedes/Cerebro</a>
-    </footer>
-  </div>
-
-  <script>
-    const ecosystem = {
-      projects: [
-        { name: "epq", status: "ACTIVE", stack: ["Next.js", "Tailwind", "FastAPI"], notes: "Produto principal de conteúdo e IA." },
-        { name: "sistema-prospeccao", status: "ACTIVE", stack: ["FastAPI", "HTML", "Proxy APIs"], notes: "Automação de prospecção e WhatsApp." },
-        { name: "ai-hub", status: "ACTIVE", stack: ["HTML", "JSON", "JS"], notes: "Hub de interfaces standalone." },
-        { name: "Cerebro", status: "ACTIVE", stack: ["HTML", "JS", "JSON"], notes: "Mapa vivo do ecossistema Hermes." },
-        { name: "prospects", status: "PLANNED", stack: ["Next.js", "Recharts"], notes: "Pipeline de prospects." },
-        { name: "pessoas", status: "PLANNED", stack: ["FastAPI", "React"], notes: "Gestão de pessoas e perfis." },
-        { name: "agentes", status: "PLANNED", stack: ["Python", "LLMs"], notes: "Agentes autônomos." },
-        { name: "b2b-opportunity-finder", status: "PLANNED", stack: ["Python", "APIs"], notes: "Oportunidades B2B." }
-      ],
-      skills: [
-        { name: "Frontend (HTML/CSS/JS)", maturity: "high", tools: ["Vite", "Webpack", "Storybook", "Chromatic"], category: "frontend" },
-        { name: "React / Next.js", maturity: "high", tools: ["Next.js", "React", "TypeScript", "Vite"], category: "frontend" },
-        { name: "Tailwind CSS", maturity: "high", tools: ["Tailwind", "PostCSS", "Autoprefixer"], category: "frontend" },
-        { name: "Python / FastAPI", maturity: "high", tools: ["FastAPI", "Uvicorn", "Pydantic", "Alembic"], category: "backend" },
-        { name: "IA / LLMs / Embeddings", maturity: "mid", tools: ["OpenAI", "Anthropic", "HuggingFace", "LangChain"], category: "ia" },
-        { name: "Automação / Agents", maturity: "mid", tools: ["n8n", "Make", "Zapier", "CrewAI"], category: "automacao" },
-        { name: "GitHub Actions / CI", maturity: "mid", tools: ["GitHub Actions", "Workflows", "Environments"], category: "devops" },
-        { name: "APIs / Integrações", maturity: "high", tools: ["REST", "GraphQL", "Webhooks", "OAuth2"], category: "integracoes" },
-        { name: "Dashboards / Visualização", maturity: "high", tools: ["D3.js", "Recharts", "ECharts", "Grafana"], category: "dados" },
-        { name: "Design Systems", maturity: "mid", tools: ["shadcn/ui", "Radix UI", "Storybook", "Tokens"], category: "frontend" },
-        { name: "Scraping / Browser", maturity: "mid", tools: ["Playwright", "Puppeteer", "Cheerio", "Browser Use"], category: "automacao" },
-        { name: "Deploy / GitHub Pages", maturity: "high", tools: ["GitHub Pages", "Vercel", "Netlify", "Docker"], category: "devops" }
-      ],
-      frameworks: [
-        { name: "Next.js", status: "ACTIVE", details: "App Router, SSR/SSG, Edge Functions, API Routes" },
-        { name: "FastAPI", status: "ACTIVE", details: "Async Python, OpenAPI, Dependency Injection, Middleware" },
-        { name: "Tailwind", status: "ACTIVE", details: "Utility-first, JIT, Custom themes, Plugins" },
-        { name: "GSAP", status: "ACTIVE", details: "ScrollTrigger, timelines, motion design, performance" },
-        { name: "Framer Motion", status: "ACTIVE", details: "React animations, gestures, layout animations" },
-        { name: "Three.js", status: "EXPERIMENTAL", details: "WebGL, 3D scenes, shaders, spatial interfaces" },
-        { name: "Playwright", status: "PLANNED", details: "E2E testing, cross-browser, visual regression" },
-        { name: "PostgreSQL", status: "ACTIVE", details: "Relational data, JSONB, migrations, pooling" },
-        { name: "Redis", status: "ACTIVE", details: "Cache, sessions, queues, pub/sub" }
-      ],
-      maturity: [
-        { domain: "Frontend", count: 4, maturity: "92%" },
-        { domain: "IA / ML", count: 3, maturity: "85%" },
-        { domain: "Automação", count: 4, maturity: "78%" },
-        { domain: "Integrações", count: 5, maturity: "88%" },
-        { domain: "DevOps", count: 3, maturity: "80%" },
-        { domain: "Dados", count: 3, maturity: "90%" }
-      ],
-      competencies: [
-        { name: "Arquitetura de interfaces de alto impacto", detail: "Dashboards, SaaS, CRMs, command centers, landing pages.", category: "frontend" },
-        { name: "Sistemas de IA e automação", detail: "LLMs, agentes, pipelines de dados, automação de processos.", category: "ia" },
-        { name: "Dashboards e visualização de dados", detail: "KPIs, relatórios, data storytelling, real-time.", category: "dados" },
-        { name: "Integrações e APIs", detail: "APIs REST/GraphQL, webhooks, OAuth2, conectores externos.", category: "integracoes" },
-        { name: "Design Systems e componentização", detail: "Bibliotecas reutilizáveis, tokens, documentação viva.", category: "frontend" },
-        { name: "Deploy e infraestrutura web", detail: "CI/CD, GitHub Pages, Vercel, Docker, monitoramento.", category: "devops" }
-      ],
-      insights: [
-        { type: "alert", title: "Dependência de APIs externas", desc: "epq e sistema-prospeccao dependem de APIs externas sem fallback claro.", severity: "high", projects: ["epq", "sistema-prospeccao"] },
-        { type: "opportunity", title: "Unificar Design System", desc: "Criar tokens e componentes compartilhados entre epq, ai-hub e Cerebro.", severity: "mid", projects: ["epq", "ai-hub", "Cerebro"] },
-        { type: "fragility", title: "Automação centralizada", desc: "Automação concentrada em poucos projetos; risco se um falhar.", severity: "mid", projects: ["sistema-prospeccao", "agentes"] },
-        { type: "next", title: "Expandir AI Agents", desc: "Agentes autônomos em agentes e b2b-opportunity-finder como próximo passo.", severity: "low", projects: ["agentes", "b2b-opportunity-finder"] },
-        { type: "alert", title: "Stack experimental sem cobertura", desc: "Three.js e Playwright ainda sem uso em produção nem testes.", severity: "mid", projects: ["Three.js", "Playwright"] },
-        { type: "opportunity", title: "Observabilidade unificada", desc: "Grafana + Redis + logs pode virar camada de inteligência operacional.", severity: "mid", projects: ["epq", "sistema-prospeccao"] }
-      ]
-    };
-
-    let currentTab = 'radar';
-    let currentFilter = 'all';
-
-    function setDetail(html) {
-      const el = document.getElementById('detail');
-      if (!el) return;
-      el.innerHTML = html || '<div class=\"detail-empty\">Selecione um item para ver detalhes.</div>';
-    }
-
-    function navigateTo(tab) {
-      currentTab = tab;
-      document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-      document.getElementById('viewport').innerHTML = '';
-      updateBrainState(tab);
-      if (tab === 'raiox') renderRaioX();
-      if (tab === 'ecosystem') renderEcosystem();
-      if (tab === 'skills') renderSkills();
-      if (tab === 'frameworks') renderFrameworks();
-      if (tab === 'maturity') renderMaturity();
-      if (tab === 'insights') renderInsights();
-    }
-
-    function severityMeta(severity) {
-      if (severity === 'high') return { label: 'ALTA', cssClass: 'chip danger' };
-      if (severity === 'mid') return { label: 'MÉDIA', cssClass: 'chip warn' };
-      return { label: 'BAIXA', cssClass: 'chip plan' };
-    }
-
-    function statusMeta(status) {
-      if (status === 'ACTIVE') return { label: 'ATIVO', cssClass: 'chip ok' };
-      if (status === 'EXPERIMENTAL') return { label: 'EXPERIMENTAL', cssClass: 'chip warn' };
-      return { label: 'PLANEJADO', cssClass: 'chip plan' };
-    }
-
-    function makeItemClickable(el, onClick) {
-      el.setAttribute('tabindex', '0');
-      el.setAttribute('role', 'button');
-      el.addEventListener('click', onClick);
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      });
-    }
-
-    function updateBrainState(state) {
-      const hotspots = document.getElementById('brain-hotspots');
-      const connections = document.getElementById('brain-connections');
-      const core = document.getElementById('brain-core');
-      const outline = document.getElementById('brain-outline');
-      const fill = document.getElementById('brain-fill');
-      const divider = document.getElementById('brain-divider');
-
-      hotspots.innerHTML = '';
-
-      const colorMap = {
-        frontend: 'var(--green)',
-        backend: 'var(--cyan)',
-        ia: 'var(--purple)',
-        automacao: 'var(--orange)',
-        devops: 'var(--green)',
-        integracoes: 'var(--cyan)',
-        dados: 'var(--purple)'
-      };
-
-      if (state === 'radar') {
-        const domains = [
-          { x: 80, y: 60, c: 'frontend' },
-          { x: 120, y: 60, c: 'backend' },
-          { x: 80, y: 100, c: 'ia' },
-          { x: 120, y: 100, c: 'automacao' },
-          { x: 80, y: 140, c: 'devops' },
-          { x: 120, y: 140, c: 'integracoes' }
-        ];
-        domains.forEach(d => {
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('cx', d.x);
-          c.setAttribute('cy', d.y);
-          c.setAttribute('r', '5');
-          c.setAttribute('fill', colorMap[d.c] || 'var(--cyan)');
-          c.setAttribute('opacity', '0.9');
-          c.style.cursor = 'pointer';
-          c.addEventListener('click', () => {
-            document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.tab === 'skills'));
-            switchTab('skills');
-            setTimeout(() => {
-              document.querySelectorAll('.filter-btn').forEach(f => f.classList.toggle('active', f.dataset.filter === d.c));
-              applyFilter(d.c);
-            }, 50);
-          });
-          hotspots.appendChild(c);
-        });
-        connections.setAttribute('opacity', '0.5');
-        core.setAttribute('fill', 'var(--cyan)');
-      } else if (state === 'skills') {
-        const positions = [
-          { x: 60, y: 50 }, { x: 140, y: 50 }, { x: 60, y: 100 }, { x: 140, y: 100 },
-          { x: 60, y: 150 }, { x: 140, y: 150 }, { x: 100, y: 80 }, { x: 100, y: 120 }
-        ];
-        positions.forEach(p => {
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('cx', p.x);
-          c.setAttribute('cy', p.y);
-          c.setAttribute('r', '3');
-          c.setAttribute('fill', 'var(--green)');
-          c.setAttribute('opacity', '0.8');
-          hotspots.appendChild(c);
-        });
-        connections.setAttribute('opacity', '0.8');
-        core.setAttribute('fill', 'var(--green)');
-      } else if (state === 'frameworks') {
-        connections.setAttribute('opacity', '0.9');
-        core.setAttribute('fill', 'var(--orange)');
-        outline.setAttribute('stroke', 'var(--orange)');
-        fill.setAttribute('fill', 'rgba(251,191,36,0.08)');
-        divider.setAttribute('stroke', 'var(--orange)');
-      } else if (state === 'maturity') {
-        connections.setAttribute('opacity', '0.4');
-        core.setAttribute('fill', 'var(--purple)');
-        outline.setAttribute('stroke', 'var(--purple)');
-        fill.setAttribute('fill', 'rgba(167,139,250,0.08)');
-        divider.setAttribute('stroke', 'var(--purple)');
-      } else if (state === 'insights') {
-        const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        pulse.setAttribute('cx', '100');
-        pulse.setAttribute('cy', '100');
-        pulse.setAttribute('r', '12');
-        pulse.setAttribute('fill', 'none');
-        pulse.setAttribute('stroke', 'var(--red)');
-        pulse.setAttribute('stroke-width', '1');
-        pulse.setAttribute('opacity', '0.6');
-        const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-        anim.setAttribute('attributeName', 'r');
-        anim.setAttribute('values', '12;25;12');
-        anim.setAttribute('dur', '2s');
-        anim.setAttribute('repeatCount', 'indefinite');
-        const animOp = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-        animOp.setAttribute('attributeName', 'opacity');
-        animOp.setAttribute('values', '0.6;0;0.6');
-        animOp.setAttribute('dur', '2s');
-        animOp.setAttribute('repeatCount', 'indefinite');
-        pulse.appendChild(anim);
-        pulse.appendChild(animOp);
-        hotspots.appendChild(pulse);
-        connections.setAttribute('opacity', '0.6');
-        core.setAttribute('fill', 'var(--red)');
-        outline.setAttribute('stroke', 'var(--red)');
-        fill.setAttribute('fill', 'rgba(248,113,113,0.08)');
-        divider.setAttribute('stroke', 'var(--red)');
-      }
-
-      if (state !== 'frameworks' && state !== 'maturity' && state !== 'insights') {
-        outline.setAttribute('stroke', 'var(--cyan)');
-        fill.setAttribute('fill', 'rgba(34,211,238,0.08)');
-        divider.setAttribute('stroke', 'var(--cyan)');
-      }
-    }
-
-    function renderRaioX() {
-      document.getElementById('panel-title').textContent = 'Raio-X';
-      const container = document.getElementById('content');
-      container.innerHTML = '';
-
-      const skillsSection = document.createElement('div');
-      skillsSection.className = 'detail-section';
-      const skillsByCategory = {};
-      ecosystem.skills.forEach(s => {
-        if (!skillsByCategory[s.category]) skillsByCategory[s.category] = [];
-        skillsByCategory[s.category].push(s);
-      });
-
-      let skillsHtml = '';
-      Object.entries(skillsByCategory).forEach(([cat, items]) => {
-        const itemsHtml = items.map(s => {
-          const maturityLabel = s.maturity === 'high' ? 'ALTA' : s.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
-          const maturityClass = s.maturity === 'high' ? 'chip ok' : s.maturity === 'mid' ? 'chip warn' : 'chip plan';
-          return `<div class="item">
-            <div class="item-header">
-              <span class="item-name">${s.name}</span>
-              <span class="chip ${maturityClass}">${maturityLabel}</span>
-            </div>
-            <div class="item-body">
-              <div class="detail-label">Ferramentas</div>
-              <div class="chips">${(s.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
-            </div>
-          </div>`;
-        }).join('');
-        skillsHtml += `<div style="margin-bottom:12px;">
-          <div class="detail-label" style="color:var(--cyan);font-size:11px;letter-spacing:0.1em;">${cat.toUpperCase()}</div>
-          <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">${itemsHtml}</div>
-        </div>`;
-      });
-
-      skillsSection.innerHTML = `<div class="detail-label" style="color:var(--green);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">HABILIDADES / SKILLS</div>${skillsHtml}`;
-      container.appendChild(skillsSection);
-
-      const compSection = document.createElement('div');
-      compSection.className = 'detail-section';
-      const compsHtml = ecosystem.competencies.map(c => {
-        return `<div class="item" style="margin-bottom:6px;">
-          <div class="item-header">
-            <span class="item-name">${c.name}</span>
-            <span class="chip" style="background:var(--purple-dim);color:var(--purple);border-color:rgba(167,139,250,0.3);">${c.category}</span>
-          </div>
-          <div class="item-body">
-            <div class="detail-text">${c.detail}</div>
-          </div>
-        </div>`;
-      }).join('');
-      compSection.innerHTML = `<div class="detail-label" style="color:var(--green);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">COMPETÊNCIAS</div><div style="display:flex;flex-direction:column;gap:6px;">${compsHtml}</div>`;
-      container.appendChild(compSection);
-
-      const fwSection = document.createElement('div');
-      fwSection.className = 'detail-section';
-      const fwsHtml = ecosystem.frameworks.map(fw => {
-        const statusClass = fw.status === 'ACTIVE' ? 'chip ok' : fw.status === 'EXPERIMENTAL' ? 'chip warn' : 'chip plan';
-        return `<div class="item" style="margin-bottom:6px;">
-          <div class="item-header">
-            <span class="item-name">${fw.name}</span>
-            <span class="chip ${statusClass}">${fw.status}</span>
-          </div>
-          <div class="item-body">
-            <div class="detail-text">${fw.details}</div>
-          </div>
-        </div>`;
-      }).join('');
-      fwSection.innerHTML = `<div class="detail-label" style="color:var(--orange);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">FRAMEWORKS</div><div style="display:flex;flex-direction:column;gap:6px;">${fwsHtml}</div>`;
-      container.appendChild(fwSection);
-
-      const matSection = document.createElement('div');
-      matSection.className = 'detail-section';
-      const matHtml = ecosystem.maturity.map(m => {
-        return `<div class="status-row" style="margin-bottom:6px;">
-          <span class="status-domain" style="font-size:12px;font-weight:500;color:var(--text)">${m.domain}</span>
-          <div class="status-bar"><div class="status-fill" style="width:${m.maturity}"></div></div>
-          <span class="chip ok">${m.maturity}</span>
-          <span class="chip" style="background:var(--cyan-dim);color:var(--cyan);border-color:rgba(34,211,238,0.3);">${m.count} skills</span>
-        </div>`;
-      }).join('');
-      matSection.innerHTML = `<div class="detail-label" style="color:var(--purple);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">MATURIDADE</div><div style="display:flex;flex-direction:column;gap:6px;">${matHtml}</div>`;
-      container.appendChild(matSection);
-
-      const insSection = document.createElement('div');
-      insSection.className = 'detail-section';
-      const sorted = [...ecosystem.insights].sort((a, b) => {
-        const order = { high: 0, mid: 1, low: 2 };
-        return (order[a.severity] ?? 9) - (order[b.severity] ?? 9);
-      });
-      const insightsHtml = sorted.map(ins => {
-        const typeLabel = ins.type === 'alert' ? 'ALERTA' : ins.type === 'opportunity' ? 'OPORTUNIDADE' : ins.type === 'fragility' ? 'FRAGILIDADE' : 'PRÓXIMO PASSO';
-        const typeClass = ins.type === 'alert' ? 'chip danger' : ins.type === 'opportunity' ? 'chip ok' : ins.type === 'fragility' ? 'chip warn' : 'chip plan';
-        const sev = severityMeta(ins.severity);
-        return `<div class="insight ${ins.type}" style="margin-bottom:8px;">
-          <div class="insight-header">
-            <span class="insight-title">${ins.title}</span>
-            <span class="insight-type ${typeClass}">${typeLabel}</span>
-          </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${ins.desc}</div>
-          <div class="chips" style="margin-top:6px;">
-            <span class="chip ${sev.cssClass}">${sev.label}</span>
-            ${(ins.projects || []).map(p => `<span class="chip">${p}</span>`).join('')}
-          </div>
-        </div>`;
-      }).join('');
-      insSection.innerHTML = `<div class="detail-label" style="color:var(--red);font-size:11px;letter-spacing:0.1em;margin-bottom:8px;">INSIGHTS / OPORTUNIDADES / FRAGILIDADES</div><div style="display:flex;flex-direction:column;gap:8px;">${insightsHtml}</div>`;
-      container.appendChild(insSection);
-    }
-
-    function renderEcosystem() {
-      document.getElementById('panel-title').textContent = 'Ecossistema';
-      const container = document.getElementById('content');
-      container.innerHTML = '<div id="ecosystem-list"></div>';
-      const list = document.getElementById('ecosystem-list');
-      ecosystem.projects.forEach(project => {
-        const row = document.createElement('div');
-        row.className = 'status-row';
-        const status = statusMeta(project.status);
-        row.innerHTML = `
-          <span class="status-domain">${project.name}</span>
-          <span class="chip ${status.cssClass}">${status.label}</span>
-        `;
-        makeItemClickable(row, () => {
-          setDetail(`
-            <div class="detail-section">
-              <div class="detail-label">Projeto</div>
-              <div class="detail-text">${project.name}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label">Status</div>
-              <div class="detail-text">${status.label}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label">Stack</div>
-              <div class="chips">${(project.stack || []).map(s => `<span class=\"chip\">${s}</span>`).join('')}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label">Notas</div>
-              <div class="detail-text">${project.notes}</div>
-            </div>
-          `);
-        });
-        list.appendChild(row);
-      });
-    }
-
-    function renderSkills() {
-      document.getElementById('panel-title').textContent = 'Skills & Competências';
-      const container = document.getElementById('content');
-      const categories = ['all', ...new Set(ecosystem.skills.map(s => s.category))];
-      container.innerHTML = `
-        <div class="filters" id="skill-filters">
-          ${categories.map(c => `<button class="filter-btn ${c === 'all' ? 'active' : ''}" data-filter="${c}">${c === 'all' ? 'Todos' : c}</button>`).join('')}
+  <main class="main">
+    <div class="wrap">
+      <div class="top">
+        <div>
+          <h1>Coleta Pedagógica EPQ</h1>
+          <div class="meta">Preenchimento rápido com sugestões automáticas</div>
         </div>
-        <div id="skills-list"></div>
-      `;
-
-      function applyFilter(cat) {
-        currentFilter = cat;
-        const list = document.getElementById('skills-list');
-        const filtered = cat === 'all' ? ecosystem.skills : ecosystem.skills.filter(s => s.category === cat);
-        list.innerHTML = '';
-        filtered.forEach(skill => {
-          const item = document.createElement('div');
-          item.className = 'item';
-          const maturityLabel = skill.maturity === 'high' ? 'ALTA' : skill.maturity === 'mid' ? 'MÉDIA' : 'BAIXA';
-          const maturityClass = skill.maturity === 'high' ? 'chip ok' : skill.maturity === 'mid' ? 'chip warn' : 'chip plan';
-          item.innerHTML = `
-            <div class="item-header">
-              <span class="item-name">${skill.name}</span>
-              <span class="chip ${maturityClass}">${maturityLabel}</span>
-              <span class="item-expand">+</span>
-            </div>
-            <div class="item-body">
-              <div class="detail-label">Ferramentas</div>
-              <div class="chips">${(skill.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
-            </div>
-          `;
-          item.addEventListener('click', () => {
-            item.classList.toggle('expanded');
-            if (item.classList.contains('expanded')) {
-              setDetail(`
-                <div class="detail-section">
-                  <div class="detail-label">Skill</div>
-                  <div class="detail-text">${skill.name}</div>
-                </div>
-                <div class="detail-section">
-                  <div class="detail-label">Categoria</div>
-                  <div class="detail-text">${skill.category}</div>
-                </div>
-                <div class="detail-section">
-                  <div class="detail-label">Maturidade</div>
-                  <div class="detail-text">${maturityLabel}</div>
-                </div>
-                <div class="detail-section">
-                  <div class="detail-label">Ferramentas</div>
-                  <div class="chips">${(skill.tools || []).map(t => `<span class="chip">${t}</span>`).join('')}</div>
-                </div>
-              `);
-            }
-          });
-          list.appendChild(item);
-        });
-      }
-
-      applyFilter('all');
-      document.querySelectorAll('#skill-filters .filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('#skill-filters .filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          applyFilter(btn.dataset.filter);
-        });
-      });
-    }
-
-    function renderFrameworks() {
-      document.getElementById('panel-title').textContent = 'Frameworks Implementados';
-      const container = document.getElementById('content');
-      container.innerHTML = '<div id="frameworks-list"></div>';
-      const list = document.getElementById('frameworks-list');
-      ecosystem.frameworks.forEach(fw => {
-        const item = document.createElement('div');
-        item.className = 'item';
-        const statusClass = fw.status === 'ACTIVE' ? 'chip ok' : fw.status === 'EXPERIMENTAL' ? 'chip warn' : 'chip plan';
-        item.innerHTML = `
-          <div class="item-header">
-            <span class="item-name">${fw.name}</span>
-            <span class="chip ${statusClass}">${fw.status}</span>
-            <span class="item-expand">+</span>
-          </div>
-          <div class="item-body">
-            <div class="detail-label">Implementação</div>
-            <div class="detail-text">${fw.details}</div>
-          </div>
-        `;
-        item.addEventListener('click', () => {
-          item.classList.toggle('expanded');
-          if (item.classList.contains('expanded')) {
-            setDetail(`
-              <div class="detail-section">
-                <div class="detail-label">Framework</div>
-                <div class="detail-text">${fw.name}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Status</div>
-                <div class="detail-text">${fw.status}</div>
-              </div>
-              <div class="detail-section">
-                <div class="detail-label">Implementação</div>
-                <div class="detail-text">${fw.details}</div>
-              </div>
-            `);
-          }
-        });
-        list.appendChild(item);
-      });
-    }
-
-    function renderMaturity() {
-      document.getElementById('panel-title').textContent = 'Maturidade por Domínio';
-      const container = document.getElementById('content');
-      container.innerHTML = '<div id="maturity-list"></div>';
-      const list = document.getElementById('maturity-list');
-      ecosystem.maturity.forEach(m => {
-        const row = document.createElement('div');
-        row.className = 'status-row';
-        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all 0.15s ease;';
-        row.innerHTML = `
-          <span class="status-domain" style="font-size:12px;font-weight:500;color:var(--text)">${m.domain}</span>
-          <div class="status-bar"><div class="status-fill" style="width:${m.maturity}"></div></div>
-          <span class="chip ok">${m.maturity}</span>
-        `;
-        row.addEventListener('click', () => {
-          setDetail(`
-            <div class="detail-section">
-              <div class="detail-label">Domínio</div>
-              <div class="detail-text">${m.domain}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label">Habilidades</div>
-              <div class="detail-text">${m.count}</div>
-            </div>
-            <div class="detail-section">
-              <div class="detail-label">Maturidade</div>
-              <div class="detail-text">${m.maturity}</div>
-            </div>
-          `);
-        });
-        list.appendChild(row);
-      });
-    }
-
-    function renderInsights() {
-      document.getElementById('panel-title').textContent = 'Insights';
-      const container = document.getElementById('content');
-      const sorted = [...ecosystem.insights].sort((a, b) => {
-        const order = { high: 0, mid: 1, low: 2 };
-        return (order[a.severity] ?? 9) - (order[b.severity] ?? 9);
-      });
-      container.innerHTML = `
-        <div class="filters" id="insight-filters">
-          <button class="filter-btn active" data-filter="all">Todos</button>
-          <button class="filter-btn" data-filter="alert">Alertas</button>
-          <button class="filter-btn" data-filter="opportunity">Oportunidades</button>
-          <button class="filter-btn" data-filter="fragility">Fragilidades</button>
-          <button class="filter-btn" data-filter="next">Próximos passos</button>
+        <div class="row">
+          <button class="btn secondary" id="exportBtn">Exportar JSON</button>
         </div>
-        <div id="insights-list"></div>
-      `;
+      </div>
+      <div class="progress"><b id="progressBar"></b></div>
 
-      function applyInsightFilter(type) {
-        const list = document.getElementById('insights-list');
-        const filtered = type === 'all' ? sorted : sorted.filter(i => i.type === type);
-        list.innerHTML = '';
-        if (!filtered.length) {
-          list.innerHTML = '<div class=\"detail-empty\">Nenhum insight para este filtro.</div>';
-          return;
-        }
-        filtered.forEach(ins => {
-          const el = document.createElement('div');
-          el.className = `insight ${ins.type}`;
-          const typeLabel = ins.type === 'alert' ? 'ALERTA' : ins.type === 'opportunity' ? 'OPORTUNIDADE' : ins.type === 'fragility' ? 'FRAGILIDADE' : 'PRÓXIMO PASSO';
-          const typeClass = ins.type === 'alert' ? 'chip danger' : ins.type === 'opportunity' ? 'chip ok' : ins.type === 'fragility' ? 'chip warn' : 'chip plan';
-          const sev = severityMeta(ins.severity);
-          el.innerHTML = `
-            <div class=\"insight-header\">
-              <span class=\"insight-title\">${ins.title}</span>
-              <span class=\"insight-type ${typeClass}\">${typeLabel}</span>
+      <form id="form">
+
+        <!-- IDENTIFICAÇÃO -->
+        <section class="section" id="s-intro">
+          <h2>1. Identificação e contexto da escola</h2>
+          <div class="grid">
+            <div class="field">
+              <label>Nome da unidade / responsável</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> EPQ Nilópolis <button type="button" class="confirm-btn" data-target="unidade" data-value="EPQ Nilópolis">Confirmar</button></div>
+              <input name="unidade" id="unidade" placeholder="Ex: EPQ Nilópolis" />
             </div>
-            <div style=\"font-size:11px;color:var(--text-muted);margin-top:4px;\">${ins.desc}</div>
-            <div class=\"chips\" style=\"margin-top:6px;\">
-              <span class=\"chip ${sev.cssClass}\">${sev.label}</span>
-              ${(ins.projects || []).map(p => `<span class=\"chip\">${p}</span>`).join('')}
+            <div class="field">
+              <label>E-mail pedagógico</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> pedagogicoepq@gmail.com <button type="button" class="confirm-btn" data-target="email_pedagogico" data-value="pedagogicoepq@gmail.com">Confirmar</button></div>
+              <input name="email_pedagogico" id="email_pedagogico" type="email" placeholder="pedagogia@..." />
             </div>
-          `;
-          makeItemClickable(el, () => {
-            setDetail(`
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Tipo</div>
-                <div class=\"detail-text\">${typeLabel}</div>
+            <div class="field">
+              <label>Cidade / bairro principal</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> Nilópolis - RJ <button type="button" class="confirm-btn" data-target="cidade" data-value="Nilópolis - RJ">Confirmar</button></div>
+              <input name="cidade" id="cidade" placeholder="Ex: Nilópolis - RJ" />
+            </div>
+            <div class="field"><label>Ano de fundação</label><input name="ano_fundacao" placeholder="Ex: 2018" /></div>
+          </div>
+          <div class="field">
+            <label>Modelo de operação</label>
+            <div class="row" data-name="modelo">
+              <label class="chip sel"><input type="radio" name="modelo" value="presencial" checked /> Presencial</label>
+              <label class="chip"><input type="radio" name="modelo" value="online" /> Online</label>
+              <label class="chip"><input type="radio" name="modelo" value="hibrido" /> Híbrido</label>
+              <label class="chip"><input type="radio" name="modelo" value="gravado" /> Aulas gravadas</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Concursos atendidos</label>
+            <div class="row" data-name="concursos">
+              <label class="chip sel"><input type="checkbox" name="concursos" value="PMERJ" checked /> PMERJ</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="ESA" checked /> ESA</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="EEAR" checked /> EEAR</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="Colégio Naval" checked /> Colégio Naval</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="EAM" checked /> EAM</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="INSS" checked /> INSS</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="TJ" checked /> TJ</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="MP" checked /> MP</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="Turma Básica" checked /> Turma Básica</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="PMESP" checked /> PMESP</label>
+              <label class="chip sel"><input type="checkbox" name="concursos" value="EPCAR" checked /> EPCAR</label>
+              <label class="chip"><input type="checkbox" name="concursos" value="Outro" /> Outro</label>
+            </div>
+          </div>
+          <div class="field"><label>Outros concursos (se houver)</label><input name="concursos_outros" placeholder="Liste separadamente" /></div>
+        </section>
+
+        <!-- METODOLOGIA -->
+        <section class="section" id="s-metodologia">
+          <h2>2. Metodologia pedagógica oficial</h2>
+          <div class="field">
+            <label>A marca EPQ é só posicionamento ou tem método operacionalizado?</label>
+            <div class="row" data-name="metodo_epq">
+              <label class="chip"><input type="radio" name="metodo_epq" value="branding" /> Só posicionamento</label>
+              <label class="chip sel"><input type="radio" name="metodo_epq" value="operacao" checked /> Operacionalizado</label>
+              <label class="chip"><input type="radio" name="metodo_epq" value="parcial" /> Parcialmente</label>
+            </div>
+            <div class="suggest-field">
+              <label>Sugestão de ajuste:</label><br/>
+              <label class="chip" style="margin-top:6px"><input type="radio" name="metodo_epq" value="parcial" /> Marcar como "Parcialmente" e descrever os passos existentes hoje</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Descreva o método oficial em até 5 passos (se existir)</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Metodologia baseada em resolução de questões de acordo com o edital, com foco na banca. <button type="button" class="confirm-btn" data-target="metodo_descricao" data-value="Metodologia baseada em resolução de questões de acordo com o edital, com foco na banca.">Confirmar</button></div>
+            <textarea name="metodo_descricao" id="metodo_descricao" placeholder="Ex: 1. Diagnóstico → 2. Aula → 3. Questões → 4. Revisão → 5. Simulado"></textarea>
+          </div>
+          <div class="grid">
+            <div class="field">
+              <label>O que o aluno recebe ao se matricular?</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> apostila/material impresso, sistema fitware, aula experimental, PAGedubank, contrato digital <button type="button" class="confirm-btn" data-target="onboarding" data-value="apostila/material impresso, sistema fitware, aula experimental, PAGedubank, contrato digital">Confirmar</button></div>
+              <input name="onboarding" id="onboarding" placeholder="Ex: plano, material, login...">
+            </div>
+            <div class="field">
+              <label>Existe diagnóstico inicial do aluno?</label>
+              <div class="row" data-name="diagnostico">
+                <label class="chip"><input type="radio" name="diagnostico" value="sim" /> Sim</label>
+                <label class="chip sel"><input type="radio" name="diagnostico" value="nao" checked /> Não</label>
               </div>
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Severidade</div>
-                <div class=\"detail-text\">${sev.label}</div>
+              <div class="suggest-field">
+                <label>Sugestão de ajuste:</label><br/>
+                <label class="chip" style="margin-top:6px"><input type="radio" name="diagnostico" value="sim" /> Marcar como "Sim" se houver avaliação inicial informal</label>
               </div>
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Descrição</div>
-                <div class=\"detail-text\">${ins.desc}</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Como é feita a revisão do conteúdo?</label>
+            <div class="row" data-name="revisao">
+              <label class="chip"><input type="checkbox" name="revisao" value="espacada" /> Repetição espaçada</label>
+              <label class="chip"><input type="checkbox" name="revisao" value="semanal" /> Bloco semanal</label>
+              <label class="chip"><input type="checkbox" name="revisao" value="tematica" /> Revisão temática por erro</label>
+              <label class="chip sel"><input type="checkbox" name="revisao" value="manual" checked /> Manual / sem sistema</label>
+            </div>
+            <div class="suggest-field">
+              <label>Sugestão de ajuste:</label><br/>
+              <label class="chip" style="margin-top:6px"><input type="checkbox" name="revisao" value="manual"> Remover "Manual" se houver qualquer revisão orientada</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Simulados: frequência e formato</label>
+            <div class="row" data-name="simulados">
+              <label class="chip"><input type="checkbox" name="simulados" value="quinzenal" /> Quinzenal</label>
+              <label class="chip"><input type="checkbox" name="simulados" value="semanal" /> Semanal</label>
+              <label class="chip"><input type="checkbox" name="simulados" value="cronometrado" /> Cronometrado</label>
+              <label class="chip"><input type="checkbox" name="simulados" value="discursiva" /> Com discursiva</label>
+              <label class="chip sel"><input type="checkbox" name="simulados" value="sem_simulado" checked /> Não há simulados estruturados</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Como é analisado o desempenho do aluno hoje?</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Ainda sem análise estruturada por aluno. <button type="button" class="confirm-btn" data-target="analise_desempenho" data-value="Ainda sem análise estruturada por aluno. O foco atual é matrícula e atendimento comercial.">Confirmar</button></div>
+            <textarea name="analise_desempenho" id="analise_desempenho" placeholder="Relatórios, reuniões, plataforma..."></textarea>
+          </div>
+        </section>
+
+        <!-- PMERJ -->
+        <section class="section" id="s-pmerj">
+          <h2>3. Curso PMERJ</h2>
+          <div class="grid">
+            <div class="field"><label>Edital base atual</label><input name="pmerj_edital" placeholder="Ex: 2024, 2025..."></div>
+            <div class="field">
+              <label>Turmas abertas agora?</label>
+              <div class="row" data-name="pmerj_turmas_abertas">
+                <label class="chip sel"><input type="radio" name="pmerj_turmas_abertas" value="sim" checked /> Sim</label>
+                <label class="chip"><input type="radio" name="pmerj_turmas_abertas" value="nao" /> Não</label>
               </div>
-              <div class=\"detail-section\">
-                <div class=\"detail-label\">Projetos</div>
-                <div class=\"chips\">${(ins.projects || []).map(p => `<span class=\"chip\">${p}</span>`).join('')}</div>
+            </div>
+            <div class="field">
+              <label>Turnos disponíveis</label>
+              <div class="row" data-name="pmerj_turnos">
+                <label class="chip sel"><input type="checkbox" name="pmerj_turnos" value="manha" checked /> Manhã</label>
+                <label class="chip sel"><input type="checkbox" name="pmerj_turnos" value="tarde" checked /> Tarde</label>
+                <label class="chip sel"><input type="checkbox" name="pmerj_turnos" value="noite" checked /> Noite</label>
+                <label class="chip sel"><input type="checkbox" name="pmerj_turnos" value="sabado" checked /> Sábado</label>
               </div>
-            `);
-          });
-          list.appendChild(el);
-        });
+            </div>
+            <div class="field"><label>Carga horária semanal recomendada</label><input name="pmerj_carga" placeholder="Ex: 8h, 12h, 15h..."></div>
+            <div class="field">
+              <label>Valor mensal</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> R$ 300 pix / R$ 330 cartão <button type="button" class="confirm-btn" data-target="pmerj_valor" data-value="R$ 300 pix / R$ 330 cartão">Confirmar</button></div>
+              <input name="pmerj_valor" id="pmerj_valor" placeholder="R$" />
+            </div>
+            <div class="field">
+              <label>Pré-requisito do aluno</label>
+              <div class="row" data-name="pmerj_prerequisito">
+                <label class="chip sel"><input type="radio" name="pmerj_prerequisito" value="zero" checked /> Zero</label>
+                <label class="chip"><input type="radio" name="pmerj_prerequisito" value="base" /> Base</label>
+                <label class="chip"><input type="radio" name="pmerj_prerequisito" value="avancado" /> Avançado</label>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Disciplinas / assuntos prioritários para PMERJ</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> matérias básicas + conteúdo específico conforme edital; foco em questões por banca. <button type="button" class="confirm-btn" data-target="pmerj_disciplinas" data-value="Matérias básicas + conteúdo específico conforme edital; foco em questões por banca.">Confirmar</button></div>
+            <textarea name="pmerj_disciplinas" id="pmerj_disciplinas" placeholder="Liste separadamente"></textarea>
+          </div>
+          <div class="field">
+            <label>Conteúdos específicos além do básico?</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Conteúdos específicos da banca do PMERJ. <button type="button" class="confirm-btn" data-target="pmerj_conteudo_especifico" data-value="Conteúdos específicos da banca do PMERJ.">Confirmar</button></div>
+            <textarea name="pmerj_conteudo_especifico" id="pmerj_conteudo_especifico" placeholder="Direito Penal, Legislação, etc."></textarea>
+          </div>
+          <div class="field">
+            <label>Diferencial do EPQ para PMERJ</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Acolhimento, método por questões por edital, professores concursados/concurseiros, foco na banca, espaço confortável e treinamento TAF. <button type="button" class="confirm-btn" data-target="pmerj_diferencial" data-value="Acolhimento, método por questões por edital, professores concursados/concurseiros, foco na banca, espaço confortável e treinamento TAF.">Confirmar</button></div>
+            <textarea name="pmerj_diferencial" id="pmerj_diferencial" placeholder="Por que um aluno escolhe a EPQ em vez de outra escola?"></textarea>
+          </div>
+          <div class="field"><label>Resultados / aprovados recentes em PMERJ</label><textarea name="pmerj_aprovados" placeholder="Nomes, classificações, ano..."></textarea></div>
+        </section>
+
+        <!-- ESA/SES -->
+        <section class="section" id="s-ses">
+          <h2>4. Curso ESA / Militares</h2>
+          <div class="grid">
+            <div class="field"><label>Sigla exata usada</label><input name="ses_sigla" value="ESA" placeholder="ESA ou SES?" /></div>
+            <div class="field"><label>Edital base atual</label><input name="ses_edital" placeholder="Ex: 2024, 2025..." /></div>
+            <div class="field">
+              <label>Turmas abertas agora?</label>
+              <div class="row" data-name="ses_turmas_abertas">
+                <label class="chip"><input type="radio" name="ses_turmas_abertas" value="sim" /> Sim</label>
+                <label class="chip sel"><input type="radio" name="ses_turmas_abertas" value="nao" checked /> Não</label>
+              </div>
+            </div>
+            <div class="field"><label>Carga horária semanal recomendada</label><input name="ses_carga" placeholder="Ex: 10h, 15h, 20h..." /></div>
+            <div class="field">
+              <label>Valor mensal</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> R$ 399,99 pix / R$ 449,99 cartão <button type="button" class="confirm-btn" data-target="ses_valor" data-value="R$ 399,99 pix / R$ 449,99 cartão">Confirmar</button></div>
+              <input name="ses_valor" id="ses_valor" placeholder="R$" />
+            </div>
+            <div class="field">
+              <label>Pré-requisito do aluno</label>
+              <div class="row" data-name="ses_prerequisito">
+                <label class="chip sel"><input type="radio" name="ses_prerequisito" value="zero" checked /> Zero</label>
+                <label class="chip"><input type="radio" name="ses_prerequisito" value="base" /> Base</label>
+                <label class="chip"><input type="radio" name="ses_prerequisito" value="avancado" /> Avançado</label>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Disciplinas / assuntos prioritários para ESA/Militares</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> matérias comuns + conteúdo específico militar; reuso de módulos básicos com PMERJ onde for possível. <button type="button" class="confirm-btn" data-target="ses_disciplinas" data-value="Matérias comuns + conteúdo específico militar; reuso de módulos básicos com PMERJ onde for possível.">Confirmar</button></div>
+            <textarea name="ses_disciplinas" id="ses_disciplinas" placeholder="Liste separadamente"></textarea>
+          </div>
+          <div class="field">
+            <label>Conteúdos específicos além do básico?</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Conteúdos específicos de ESA, EEAR, Colégio Naval e EPCAR. <button type="button" class="confirm-btn" data-target="ses_conteudo_especifico" data-value="Conteúdos específicos de ESA, EEAR, Colégio Naval e EPCAR.">Confirmar</button></div>
+            <textarea name="ses_conteudo_especifico" id="ses_conteudo_especifico" placeholder="Matérias específicas da ESA/SES..."></textarea>
+          </div>
+          <div class="field">
+            <label>Diferencial do EPQ para ESA/Militares</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Mesmo pacote de diferenciais da PMERJ, com módulo unificado para matérias básicas e separação apenas nas específicas. <button type="button" class="confirm-btn" data-target="ses_diferencial" data-value="Mesmo pacote de diferenciais da PMERJ, com módulo unificado para matérias básicas e separação apenas nas específicas.">Confirmar</button></div>
+            <textarea name="ses_diferencial" id="ses_diferencial" placeholder="Por que escolher a EPQ?"></textarea>
+          </div>
+          <div class="field"><label>Resultados / aprovados recentes em ESA/Militares</label><textarea name="ses_aprovados" placeholder="Nomes, classificações, ano..."></textarea></div>
+        </section>
+
+        <!-- PROFESSORES -->
+        <section class="section" id="s-professores">
+          <h2>5. Corpo docente e produção</h2>
+          <div class="grid">
+            <div class="field"><label>Total de professores hoje</label><input name="prof_total" type="number" placeholder="Ex: 12" /></div>
+            <div class="field">
+              <label>Professores exclusivos por concurso?</label>
+              <div class="row" data-name="prof_exclusivo">
+                <label class="chip sel"><input type="radio" name="prof_exclusivo" value="sim" checked /> Sim</label>
+                <label class="chip"><input type="radio" name="prof_exclusivo" value="nao" /> Não</label>
+                <label class="chip"><input type="radio" name="prof_exclusivo" value="parcial" /> Parcial</label>
+              </div>
+            </div>
+          </div>
+          <div class="field"><label>Disciplinas lecionadas e professores responsáveis (lista simples)</label><textarea name="prof_lista" placeholder="Ex: Português - Prof. A / Matemática - Prof. B"></textarea></div>
+          <div class="field">
+            <label>Existe padrão de aula documentado?</label>
+            <div class="row" data-name="prof_padrao">
+              <label class="chip"><input type="radio" name="prof_padrao" value="sim" /> Sim</label>
+              <label class="chip sel"><input type="radio" name="prof_padrao" value="nao" checked /> Não</label>
+            </div>
+            <div class="suggest-field">
+              <label>Sugestão de ajuste:</label><br/>
+              <label class="chip" style="margin-top:6px"><input type="radio" name="prof_padrao" value="sim"> Marcar como "Sim" se houver roteiro mínimo por disciplina</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Como é produzido o material de aula?</label>
+            <div class="row" data-name="prof_material">
+              <label class="chip sel"><input type="checkbox" name="prof_material" value="proprio" checked /> Material próprio</label>
+              <label class="chip"><input type="checkbox" name="prof_material" value="adaptado" /> Adaptado</label>
+              <label class="chip"><input type="checkbox" name="prof_material" value="comprado" /> Comprado</label>
+              <label class="chip sel"><input type="checkbox" name="prof_material" value="pdf" checked /> PDFs / apostilas</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Existe revisão pedagógica do material antes de ir para aula?</label>
+            <div class="row" data-name="prof_revisao">
+              <label class="chip"><input type="radio" name="prof_revisao" value="sim" /> Sim</label>
+              <label class="chip sel"><input type="radio" name="prof_revisao" value="nao" checked /> Não</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Frequência das reuniões pedagógicas</label>
+            <div class="row" data-name="prof_reunioes">
+              <label class="chip"><input type="radio" name="prof_reunioes" value="semanal" /> Semanal</label>
+              <label class="chip"><input type="radio" name="prof_reunioes" value="quinzenal" /> Quinzenal</label>
+              <label class="chip"><input type="radio" name="prof_reunioes" value="mensal" /> Mensal</label>
+              <label class="chip sel"><input type="radio" name="prof_reunioes" value="esporadica" checked /> Esporádica</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- ACOMPANHAMENTO DO ALUNO -->
+        <section class="section" id="s-aluno">
+          <h2>6. Acompanhamento do aluno</h2>
+          <div class="field">
+            <label>O que é medido hoje?</label>
+            <div class="row" data-name="aluno_mede">
+              <label class="chip sel"><input type="checkbox" name="aluno_mede" value="presenca" checked /> Presença</label>
+              <label class="chip sel"><input type="checkbox" name="aluno_mede" value="questoes" checked /> Questões resolvidas</label>
+              <label class="chip"><input type="checkbox" name="aluno_mede" value="acerto" /> % de acerto</label>
+              <label class="chip"><input type="checkbox" name="aluno_mede" value="simulados" /> Simulados</label>
+              <label class="chip"><input type="checkbox" name="aluno_mede" value="evolucao" /> Evolução histórica</label>
+              <label class="chip"><input type="checkbox" name="aluno_mede" value="revisao" /> Revisões</label>
+              <label class="chip sel"><input type="checkbox" name="aluno_mede" value="nada" checked /> Nada sistêmico</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Existe acompanhamento individual periódico?</label>
+            <div class="row" data-name="aluno_individual">
+              <label class="chip"><input type="radio" name="aluno_individual" value="sim" /> Sim</label>
+              <label class="chip sel"><input type="radio" name="aluno_individual" value="nao" checked /> Não</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Existe protocolo de recuperação para baixo desempenho?</label>
+            <div class="row" data-name="aluno_recuperacao">
+              <label class="chip"><input type="radio" name="aluno_recuperacao" value="sim" /> Sim</label>
+              <label class="chip sel"><input type="radio" name="aluno_recuperacao" value="nao" checked /> Não</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Existe protocolo de reta final (últimas semanas antes da prova)?</label>
+            <div class="row" data-name="aluno_reta">
+              <label class="chip"><input type="radio" name="aluno_reta" value="sim" /> Sim</label>
+              <label class="chip sel"><input type="radio" name="aluno_reta" value="nao" checked /> Não</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Como o erro do aluno é utilizado pedagogicamente?</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Sem sistema de banco de erros ou revisão automática. A correção acontece pontualmente na aula. <button type="button" class="confirm-btn" data-target="aluno_erro" data-value="Sem sistema de banco de erros ou revisão automática. A correção acontece pontualmente na aula.">Confirmar</button></div>
+            <textarea name="aluno_erro" id="aluno_erro" placeholder="Banco de erros, revisão automática, atendimento individual..."></textarea>
+          </div>
+        </section>
+
+        <!-- COMERCIAL -->
+        <section class="section" id="s-comercial">
+          <h2>7. Comercial e experiência do lead</h2>
+          <div class="grid">
+            <div class="field">
+              <label>Valor mensal médio</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> PMERJ: R$ 300 pix / R$ 330 cartão | Militares: R$ 399,99 pix / R$ 449,99 cartão | EAM: R$ 380 pix / R$ 419,99 cartão <button type="button" class="confirm-btn" data-target="comercial_valor" data-value="PMERJ: R$ 300 pix / R$ 330 cartão | Militares: R$ 399,99 pix / R$ 449,99 cartão | EAM: R$ 380 pix / R$ 419,99 cartão">Confirmar</button></div>
+              <input name="comercial_valor" id="comercial_valor" placeholder="R$" />
+            </div>
+            <div class="field">
+              <label>Forma de pagamento</label>
+              <div class="row" data-name="comercial_pagamento">
+                <label class="chip sel"><input type="checkbox" name="comercial_pagamento" value="cartao" checked /> Cartão</label>
+                <label class="chip sel"><input type="checkbox" name="comercial_pagamento" value="boleto" checked /> Boleto</label>
+                <label class="chip sel"><input type="checkbox" name="comercial_pagamento" value="pix" checked /> PIX</label>
+              </div>
+            </div>
+            <div class="field">
+              <label>Material incluso na mensalidade?</label>
+              <div class="row" data-name="comercial_material">
+                <label class="chip sel"><input type="radio" name="comercial_material" value="sim" checked /> Sim</label>
+                <label class="chip"><input type="radio" name="comercial_material" value="nao" /> Não</label>
+              </div>
+            </div>
+            <div class="field">
+              <label>Existe período de experiência / garantia?</label>
+              <div class="row" data-name="comercial_garantia">
+                <label class="chip"><input type="radio" name="comercial_garantia" value="sim" /> Sim</label>
+                <label class="chip sel"><input type="radio" name="comercial_garantia" value="nao" checked /> Não</label>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Maiores objeções dos leads no atendimento</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Principalmente valores; em alguns casos, falta de informação no atendimento por mudança de equipe. <button type="button" class="confirm-btn" data-target="comercial_objecoes" data-value="Principalmente valores; em alguns casos, falta de informação no atendimento por mudança de equipe.">Confirmar</button></div>
+            <textarea name="comercial_objecoes" id="comercial_objecoes" placeholder="Liste as objeções mais comuns"></textarea>
+          </div>
+          <div class="field">
+            <label>Quais canais de captação de leads são usados hoje?</label>
+            <div class="row" data-name="comercial_canais">
+              <label class="chip sel"><input type="checkbox" name="comercial_canais" value="instagram" checked /> Instagram</label>
+              <label class="chip"><input type="checkbox" name="comercial_canais" value="facebook" /> Facebook</label>
+              <label class="chip sel"><input type="checkbox" name="comercial_canais" value="google" checked /> Google Ads</label>
+              <label class="chip"><input type="checkbox" name="comercial_canais" value="indicacao" /> Indicação</label>
+              <label class="chip sel"><input type="checkbox" name="comercial_canais" value="whatsapp" checked /> WhatsApp</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- RESULTADOS -->
+        <section class="section" id="s-resultados">
+          <h2>8. Resultados e diferenciais</h2>
+          <div class="field"><label>Taxa de aprovação geral (se houver)</label><input name="resultados_taxa" placeholder="Ex: 35% dos alunos aprovados em 2024" /></div>
+          <div class="field"><label>Aprovados em destaque (concurso / ano / classificação)</label><textarea name="resultados_aprovados" placeholder="Liste os casos que podem ser usados como prova social"></textarea></div>
+          <div class="field">
+            <label>Depoimentos / cases organizados?</label>
+            <div class="row" data-name="resultados_depoimentos">
+              <label class="chip sel"><input type="radio" name="resultados_depoimentos" value="sim" checked /> Sim</label>
+              <label class="chip"><input type="radio" name="resultados_depoimentos" value="nao" /> Não</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Diferenciais declarados do EPQ</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Espaço confortável, treinamento TAF, método por questões, professores concursados/concurseiros, unidade acolhedora e foco na banca do edital. <button type="button" class="confirm-btn" data-target="resultados_diferenciais" data-value="Espaço confortável, treinamento TAF, método por questões, professores concursados/concurseiros, unidade acolhedora e foco na banca do edital.">Confirmar</button></div>
+            <textarea name="resultados_diferenciais" id="resultados_diferenciais" placeholder="O que é único ou relevante na sua proposta?"></textarea>
+          </div>
+        </section>
+
+        <!-- PROTOCOLOS -->
+        <section class="section" id="s-protocolos">
+          <h2>9. Protocolos pedagógicos</h2>
+          <div class="field"><label>Protocolo de recuperação (passo a passo)</label><textarea name="protocolo_recuperacao" placeholder="O que acontece quando o aluno vai mal?"></textarea></div>
+          <div class="field"><label>Protocolo de reta final (passo a passo)</label><textarea name="protocolo_reta" placeholder="O que muda nas últimas semanas?"></textarea></div>
+          <div class="field"><label>Regra de evolução de turma / trilha</label><textarea name="protocolo_evolucao" placeholder="Ex: se acertar >80%, pode subir de nível..."></textarea></div>
+          <div class="field">
+            <label>Existe política de rematrícula ou permanência?</label>
+            <div class="row" data-name="protocolo_rematricula">
+              <label class="chip"><input type="radio" name="protocolo_rematricula" value="sim" /> Sim</label>
+              <label class="chip sel"><input type="radio" name="protocolo_rematricula" value="nao" checked /> Não</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- INFRA -->
+        <section class="section" id="s-infra">
+          <h2>10. Infraestrutura e tecnologia</h2>
+          <div class="grid">
+            <div class="field"><label>Total de salas / unidades físicas</label><input name="infra_salas" placeholder="Ex: 3 salas" /></div>
+            <div class="field">
+              <label>Capacidade por sala</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> até 60 alunos <button type="button" class="confirm-btn" data-target="infra_capacidade" data-value="até 60 alunos">Confirmar</button></div>
+              <input name="infra_capacidade" id="infra_capacidade" placeholder="Ex: 30 alunos" />
+            </div>
+            <div class="field">
+              <label>Plataforma de questões / material digital</label>
+              <div class="auto-fill"><strong>Sugestão:</strong> Fitware + PAGedubank + contratos digitais <button type="button" class="confirm-btn" data-target="infra_plataforma" data-value="Fitware + PAGedubank + contratos digitais">Confirmar</button></div>
+              <input name="infra_plataforma" id="infra_plataforma" placeholder="Nome ou 'não existe'" />
+            </div>
+            <div class="field">
+              <label>Automação / IA aplicada à pedagogia?</label>
+              <div class="row" data-name="infra_ia">
+                <label class="chip"><input type="radio" name="infra_ia" value="sim" /> Sim</label>
+                <label class="chip sel"><input type="radio" name="infra_ia" value="nao" checked /> Não</label>
+              </div>
+            </div>
+          </div>
+          <div class="field"><label>O que pode ser automatizado com IA hoje (se souber)?</label><textarea name="infra_ia_descricao" placeholder="Ex: revisão de redação, análise de desempenho..."></textarea></div>
+        </section>
+
+        <!-- FINAL -->
+        <section class="section" id="s-final">
+          <h2>11. Finalização e próximos passos</h2>
+          <div class="field">
+            <label>Quem é o responsável por revisar e validar esses dados?</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Ronan jorge / Tayná Paulino <button type="button" class="confirm-btn" data-target="final_responsavel" data-value="Ronan jorge / Tayná Paulino">Confirmar</button></div>
+            <input name="final_responsavel" id="final_responsavel" placeholder="Nome / cargo" />
+          </div>
+          <div class="field"><label>Data limite para alimentar o painel pedagógico</label><input name="final_prazo" type="date" /></div>
+          <div class="field">
+            <label>Observações gerais</label>
+            <div class="auto-fill"><strong>Sugestão:</strong> Material de campanha disponível: fotos de alunos, aprovados, depoimentos em vídeo, vídeos de aulas e institucionais. Aprovação de criativos com Ronan em até 1 a 3 dias. <button type="button" class="confirm-btn" data-target="final_obs" data-value="Material de campanha disponível: fotos de alunos, aprovados, depoimentos em vídeo, vídeos de aulas e institucionais. Aprovação de criativos com Ronan em até 1 a 3 dias.">Confirmar</button></div>
+            <textarea name="final_obs" id="final_obs" placeholder="Qualquer detalhe adicional"></textarea>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button type="button" class="btn secondary" id="resetBtn">Limpar confirmações</button>
+          <button type="button" class="btn" id="copyBtn">Copiar dados</button>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast">Mensagem</div>
+
+<script>
+(function(){
+  const FORM=document.getElementById('form');
+  const BAR=document.getElementById('progressBar');
+  const TOAST=document.getElementById('toast');
+  const EXPORT_BTN=document.getElementById('exportBtn');
+  const COPY_BTN=document.getElementById('copyBtn');
+  const RESET_BTN=document.getElementById('resetBtn');
+
+  function toast(msg){TOAST.textContent=msg;TOAST.style.display='block';setTimeout(()=>TOAST.style.display='none',2200)}
+
+  function toggleChips(){
+    document.querySelectorAll('.chip').forEach(c=>{
+      const input=c.querySelector('input');
+      c.classList.toggle('sel', input.checked);
+      if(input.type==='radio') c.classList.toggle('sel', input.checked);
+    });
+  }
+  document.querySelectorAll('input').forEach(i=>i.addEventListener('change',toggleChips));
+  toggleChips();
+
+  function progress(){
+    const inputs=FORM.querySelectorAll('input,textarea,select');
+    let filled=0;
+    inputs.forEach(i=>{
+      if(i.type==='radio' || i.type==='checkbox'){
+        const name=i.name;
+        if(name && FORM.querySelector(`[name="${name}"]:checked`)) filled++;
+      }else if(i.value && i.value.trim()) filled++;
+    });
+    const total=Math.max(inputs.length,1);
+    const pct=Math.round((filled/total)*100);
+    BAR.style.width=pct+'%';
+    return pct;
+  }
+  FORM.addEventListener('input',progress);
+  FORM.addEventListener('change',progress);
+  progress();
+
+  function getFormData(){
+    const data={};
+    const formData=new FormData(FORM);
+    formData.forEach((value,key)=>{
+      if(data[key]){if(Array.isArray(data[key])) data[key].push(value); else data[key]=[data[key],value];}
+      else data[key]=value;
+    });
+    return data;
+  }
+
+  document.querySelectorAll('.confirm-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target=document.getElementById(btn.dataset.target);
+      const value=btn.dataset.value;
+      if(target){ target.value=value; target.dispatchEvent(new Event('input',{bubbles:true})); toast('Sugestão aplicada'); }
+    });
+  });
+
+  EXPORT_BTN.addEventListener('click',()=>{
+    const data=getFormData();
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='epq-planejamento-pedagogico.json';
+    a.click();
+    toast('JSON exportado');
+  });
+
+  COPY_BTN.addEventListener('click',async ()=>{
+    const data=getFormData();
+    try{
+      await navigator.clipboard.writeText(JSON.stringify(data,null,2));
+      toast('Dados copiados');
+    }catch(e){
+      toast('Não foi possível copiar');
+    }
+  });
+
+  RESET_BTN.addEventListener('click',()=>{
+    if(confirm('Limpar todos os campos?')) FORM.reset(), toggleChips(), progress();
+  });
+
+  document.querySelectorAll('.nav button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target=document.getElementById(btn.dataset.target);
+      if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+      document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  const sections=['s-intro','s-metodologia','s-pmerj','s-ses','s-professores','s-aluno','s-comercial','s-resultados','s-protocolos','s-infra','s-final'];
+  const observer=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const id=entry.target.id;
+        document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.target===id));
       }
-
-      applyInsightFilter('all');
-      document.querySelectorAll('#insight-filters .filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('#insight-filters .filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          applyInsightFilter(btn.dataset.filter);
-        });
-      });
-    }
-
-    function switchTab(tab) {
-      navigateTo(tab);
-    }
-
-    function init() {
-      document.getElementById('metric-ecosystem').textContent = String(ecosystem.projects.length);
-      document.getElementById('metric-skills').textContent = String(ecosystem.skills.length);
-      document.getElementById('metric-frameworks').textContent = String(ecosystem.frameworks.filter(f => f.status === 'ACTIVE').length);
-      document.getElementById('metric-alerts').textContent = String(ecosystem.insights.filter(i => i.type === 'alert').length);
-
-      document.querySelectorAll('.nav button').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-      });
-
-      document.querySelectorAll('.panel').forEach(panel => {
-        const titleEl = panel.querySelector('.kpi-title');
-        if (!titleEl) return;
-        const tab = titleEl.textContent.trim().toLowerCase();
-        let target = null;
-        if (tab === 'ecossistema') target = 'ecosystem';
-        else if (tab === 'skills') target = 'skills';
-        else if (tab === 'frameworks') target = 'frameworks';
-        else if (tab === 'alertas') target = 'insights';
-        if (!target) return;
-        makeItemClickable(panel, () => switchTab(target));
-      });
-
-      updateBrainState('raiox');
-      renderRaioX();
-    }
-
-    init();
-  </script>
+    });
+  },{rootMargin:'-20% 0px -70% 0px'});
+  sections.forEach(id=>{const el=document.getElementById(id); if(el) observer.observe(el);});
+})();
+</script>
 </body>
 </html>
